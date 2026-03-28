@@ -1,3 +1,33 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: moida
+  datasource:
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+## p6spy
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: on
+
+## logging
+logging:
+  charset:
+    console: UTF-8
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:%-5p} ${PID} --- [%15.15t] %-40.40logger{39} :%06L : %m%n"
+  level:
+    root: info
+    web: info
+    com.malgn: debug
+
+## jwt
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 3600000
