@@ -49,10 +49,23 @@ public class User extends BaseEntity {
     @Column(nullable = false, columnDefinition = "geography(Point,4326)")
     private Point location;
 
-    public static User of(String username, String password) {
+    public static User of
+        (
+            String username,
+            String password,
+            String nickname,
+            String userEmail,
+            String address,
+            Point location
+        ) {
         User user = new User();
         user.username = username;
         user.password = password;
+        user.nickname = nickname;
+        user.userEmail = userEmail;
+        user.role = UserRole.USER;
+        user.address = address;
+        user.location = location;
         return user;
     }
 
