@@ -4,6 +4,7 @@ import com.peopleground.moida.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -14,18 +15,18 @@ public class AuditingEntity extends BaseEntity{
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, length = 50)
-    protected String createdBy;
+    protected UUID createdBy;
 
     @LastModifiedBy
     @Column(name = "last_modified_by", length = 50)
-    protected String lastModifiedBy;
+    protected UUID lastModifiedBy;
 
     @Column(name = "deleted_by", length = 50)
-    protected String deletedBy;
+    protected UUID deletedBy;
 
     public void deleteBy(User user) {
         this.deletedDate = LocalDateTime.now();
-        this.deletedBy = user.getUsername();
+        this.deletedBy = user.getId();
     }
 
 }

@@ -100,8 +100,8 @@ public class JwtTokenProvider {
             .getBody();
     }
 
-    public Long getUserId(String token) {
-        return Long.parseLong(parseClaims(token).getSubject());
+    public UUID getUserId(String token) {
+        return UUID.fromString(parseClaims(token).getSubject());
     }
 
     public String getUsername(String token) {
