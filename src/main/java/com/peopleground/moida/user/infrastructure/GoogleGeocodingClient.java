@@ -2,6 +2,7 @@ package com.peopleground.moida.user.infrastructure;
 
 import com.peopleground.moida.global.exception.ApiErrorCode;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.user.presentation.dto.request.GeocodeResponse;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,31 +22,30 @@ public class GoogleGeocodingClient implements GeocodingClient {
     @Override
     public GeoPoint convert(String address) {
 
-        Map response = webClient.get()
+        GeocodeResponse response = webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/maps/api/geocode/json")
                 .queryParam("address", address)
                 .queryParam("key", apiKey)
                 .build())
             .retrieve()
-            .bodyToMono(Map.class)
+            .bodyToMono(GeocodeResponse.class)
             .block();
 
         if (response == null) {
             throw new AppException(ApiErrorCode.EXTERNAL_API_ERROR);
         }
 
-        if (!"OK".equals(response.get("status"))) {
+        if (!"OK".equals(response.status())) {
             throw new AppException(ApiErrorCode.ADDRESS_CONVERT_FAILED);
         }
 
-        List results = (List) response.get("results");
-        Map first =  (Map) results.get(0);
-        Map geometry = (Map) first.get("geometry");
-        Map location = (Map) geometry.get("location");
+        if (response.results() == null || response.results().isEmpty()) {
+            throw new AppException(ApiErrorCode.ADDRESS_CONVERT_FAILED);
+        }
 
-        double lat = ((Number) location.get("lat")).doubleValue();
-        double lng = ((Number) location.get("lng")).doubleValue();
+        double lat = response.results().get(0).geometry().location().lat();
+        double lng = response.results().get(0).geometry().location().lng();
 
         return new GeoPoint(lat, lng);
     }
