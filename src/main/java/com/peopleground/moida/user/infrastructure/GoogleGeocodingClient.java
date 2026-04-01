@@ -42,7 +42,7 @@ public class GoogleGeocodingClient implements GeocodingClient {
         List results = (List) response.get("results");
         Map first =  (Map) results.get(0);
         Map geometry = (Map) first.get("geometry");
-        Map location = (Map) first.get("location");
+        Map location = (Map) geometry.get("location");
 
         double lat = ((Number) location.get("lat")).doubleValue();
         double lng = ((Number) location.get("lng")).doubleValue();
