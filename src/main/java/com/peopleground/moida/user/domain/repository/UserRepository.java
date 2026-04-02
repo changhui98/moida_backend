@@ -14,4 +14,6 @@ public interface UserRepository {
     User save(User user);
 
     Page<User> findAllUsers(Pageable pageable);
+
+    Page<User> findAllUserForAdmin(Pageable pageable);
 }
