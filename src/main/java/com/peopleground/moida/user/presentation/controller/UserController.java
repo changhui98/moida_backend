@@ -3,6 +3,7 @@ package com.peopleground.moida.user.presentation.controller;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.user.application.UserService;
+import com.peopleground.moida.user.presentation.dto.response.UserDetailResponse;
 import com.peopleground.moida.user.presentation.dto.response.UserResponseMarker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,5 +31,14 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserDetailResponse> getMyProfile(
+        @AuthenticationPrincipal CustomUser customUser
+    ) {
+
+        UserDetailResponse res = userService.getMyProfile(customUser);
+
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
 
 }

@@ -2,11 +2,16 @@ package com.peopleground.moida.user.application;
 
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
+import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.user.domain.UserErrorCode;
+import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.entity.UserRole;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import com.peopleground.moida.user.presentation.dto.response.AdminUserResponse;
+import com.peopleground.moida.user.presentation.dto.response.UserDetailResponse;
 import com.peopleground.moida.user.presentation.dto.response.UserResponse;
 import com.peopleground.moida.user.presentation.dto.response.UserResponseMarker;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +26,13 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
+    public UserDetailResponse getMyProfile(CustomUser customUser) {
+        User user = getUser(customUser);
+
+        return UserDetailResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<UserResponseMarker> getUsers(CustomUser user, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -31,6 +43,18 @@ public class UserService {
 
         Page<UserResponse> result = userRepository.findAllUsers(pageable).map(UserResponse::from);
         return PageResponse.from(result);
+    }
+
+    private User getUser(CustomUser customUser) {
+        User user = userRepository.findByUsername(customUser.getUsername()).orElseThrow(
+            () -> new AppException(UserErrorCode.USER_NOT_FOUND)
+        );
+
+        if (user.isDeleted()) {
+            throw new AppException(UserErrorCode.USER_NOT_FOUND);
+        }
+
+        return user;
     }
 
     private boolean isCurrentUserAdmin(CustomUser user) {
