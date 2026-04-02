@@ -10,7 +10,7 @@ public record AdminUserResponse(
     String userEmail,
     String address,
     boolean isDeleted
-) {
+) implements UserResponseMarker{
 
     public static AdminUserResponse from(User user) {
         return new AdminUserResponse(
