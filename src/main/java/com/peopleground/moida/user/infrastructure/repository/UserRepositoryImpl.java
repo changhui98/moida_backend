@@ -38,4 +38,10 @@ public class UserRepositoryImpl implements UserRepository {
 
         return userQueryRepository.findAllUsers(pageable);
     }
+
+    @Override
+    public Page<User> findAllUserForAdmin(Pageable pageable) {
+
+        return userQueryRepository.findAllUsersForAdmin(pageable);
+    }
 }

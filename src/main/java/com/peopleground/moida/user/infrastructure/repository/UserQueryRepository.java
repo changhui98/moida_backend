@@ -22,6 +22,26 @@ public class UserQueryRepository {
 
         List<User> content = queryFactory
             .selectFrom(user)
+            .where(user.deletedDate.isNull())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(user.count())
+            .from(user)
+            .where(user.deletedDate.isNull())
+            .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0);
+    }
+
+    public Page<User> findAllUsersForAdmin(Pageable pageable) {
+
+        QUser user = QUser.user;
+
+        List<User> content = queryFactory
+            .selectFrom(user)
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
