@@ -3,7 +3,7 @@ package com.peopleground.moida.user.presentation.controller;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.user.application.UserService;
-import com.peopleground.moida.user.presentation.dto.response.UserResponse;
+import com.peopleground.moida.user.presentation.dto.response.UserResponseMarker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +21,12 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<?>> getUsers(
+    public ResponseEntity<PageResponse<UserResponseMarker>> getUsers(
         @AuthenticationPrincipal CustomUser customUser,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
-        PageResponse<?> res = userService.getUsers(customUser, page, size);
+        PageResponse<UserResponseMarker> res = userService.getUsers(customUser, page, size);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 

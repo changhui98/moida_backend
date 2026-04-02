@@ -9,7 +9,7 @@ public record UserResponse(
     String nickname,
     String userEmail,
     String address
-) {
+) implements UserResponseMarker{
 
     public static UserResponse from(User user) {
         return new UserResponse(

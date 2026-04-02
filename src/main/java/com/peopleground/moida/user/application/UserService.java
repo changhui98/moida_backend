@@ -6,6 +6,7 @@ import com.peopleground.moida.user.domain.entity.UserRole;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import com.peopleground.moida.user.presentation.dto.response.AdminUserResponse;
 import com.peopleground.moida.user.presentation.dto.response.UserResponse;
+import com.peopleground.moida.user.presentation.dto.response.UserResponseMarker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +21,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public PageResponse<?> getUsers(CustomUser user, int page, int size) {
+    public PageResponse<UserResponseMarker> getUsers(CustomUser user, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
         if (isCurrentUserAdmin(user)) {
