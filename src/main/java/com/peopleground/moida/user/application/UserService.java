@@ -45,6 +45,14 @@ public class UserService {
         return PageResponse.from(result);
     }
 
+    @Transactional
+    public void deleteUser(CustomUser customUser) {
+        User user = getUser(customUser);
+
+        user.delete();
+        userRepository.save(user);
+    }
+
     private User getUser(CustomUser customUser) {
         User user = userRepository.findByUsername(customUser.getUsername()).orElseThrow(
             () -> new AppException(UserErrorCode.USER_NOT_FOUND)
