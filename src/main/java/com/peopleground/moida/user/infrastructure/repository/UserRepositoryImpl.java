@@ -44,4 +44,9 @@ public class UserRepositoryImpl implements UserRepository {
 
         return userQueryRepository.findAllUsersForAdmin(pageable);
     }
+
+    @Override
+    public User updateProfile(User updateUser) {
+        return userJpaRepository.save(updateUser);
+    }
 }

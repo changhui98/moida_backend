@@ -69,4 +69,22 @@ public class User extends BaseEntity {
         return user;
     }
 
+    public User updateUser
+        (
+            String nickname,
+            String userEmail,
+            String address,
+            Point location,
+            String newPassword
+        ) {
+        User user = new User();
+        user.nickname = nickname;
+        user.password = newPassword;
+        user.address = address;
+        user.location = location;
+        user.userEmail = userEmail;
+        onUpdate();
+        return user;
+    }
+
 }
