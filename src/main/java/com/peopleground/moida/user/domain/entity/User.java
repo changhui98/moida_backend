@@ -77,14 +77,12 @@ public class User extends BaseEntity {
             Point location,
             String newPassword
         ) {
-        User user = new User();
-        user.nickname = nickname;
-        user.password = newPassword;
-        user.address = address;
-        user.location = location;
-        user.userEmail = userEmail;
-        onUpdate();
-        return user;
+        this.nickname = nickname;
+        this.password = newPassword;
+        this.address = address;
+        this.location = location;
+        this.userEmail = userEmail;
+        return this;
     }
 
 }
