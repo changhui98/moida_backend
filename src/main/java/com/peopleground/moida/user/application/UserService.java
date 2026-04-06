@@ -61,14 +61,17 @@ public class UserService {
         User user = getUser(customUser);
 
         String encodedNewPassword = user.getPassword();
-        if (req.currentPassword() == null || req.currentPassword().isBlank()) {
-            throw new AppException(UserErrorCode.PASSWORD_REQUIRED);
-        }
+        if (req.newPassword() != null && !req.newPassword().isBlank()) {
 
-        if (!passwordEncoder.matches(req.currentPassword(), user.getPassword())) {
-            throw new AppException(UserErrorCode.INVALID_CURRENT_PASSWORD);
+            if (req.currentPassword() == null || req.currentPassword().isBlank()) {
+                throw new AppException(UserErrorCode.PASSWORD_REQUIRED);
+            }
+
+            if (!passwordEncoder.matches(req.currentPassword(), user.getPassword())) {
+                throw new AppException(UserErrorCode.INVALID_CURRENT_PASSWORD);
+            }
+            encodedNewPassword = passwordEncoder.encode(req.currentPassword());
         }
-        encodedNewPassword = passwordEncoder.encode(req.currentPassword());
 
         String address = req.address() != null ? req.address() : user.getAddress();
         Point location;
@@ -84,12 +87,12 @@ public class UserService {
         }
 
         String nickname = req.nickname() != null ? req.nickname() : user.getNickname();
-        String userEmail = req.userEmail() != null ? req.userEmail() : user.getUsername();
+        String userEmail = req.userEmail() != null ? req.userEmail() : user.getUserEmail();
 
         User updateUser = user.updateUser(nickname, userEmail, address, location, encodedNewPassword);
 
         User saveUser = userRepository.updateProfile(updateUser);
-        
+
         return  UserDetailResponse.from(saveUser);
     }
 
