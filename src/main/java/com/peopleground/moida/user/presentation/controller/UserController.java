@@ -27,11 +27,10 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<PageResponse<UserResponseMarker>> getUsers(
-        @AuthenticationPrincipal CustomUser customUser,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size
     ) {
-        PageResponse<UserResponseMarker> res = userService.getUsers(customUser, page, size);
+        PageResponse<UserResponseMarker> res = userService.getUsers(page, size);
 
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
