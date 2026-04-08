@@ -43,15 +43,11 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<UserResponseMarker> getUsers(CustomUser user, int page, int size) {
+    public PageResponse<UserResponseMarker> getUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
-        if (isCurrentUserAdmin(user)) {
-            Page<AdminUserResponse> result = userRepository.findAllUserForAdmin(pageable).map(AdminUserResponse::from);
-            return PageResponse.from(result);
-        }
-
         Page<UserResponse> result = userRepository.findAllUsers(pageable).map(UserResponse::from);
+
         return PageResponse.from(result);
     }
 
@@ -114,9 +110,5 @@ public class UserService {
         }
 
         return user;
-    }
-
-    private boolean isCurrentUserAdmin(CustomUser user) {
-        return user.getRole().equals(UserRole.ADMIN);
     }
 }
