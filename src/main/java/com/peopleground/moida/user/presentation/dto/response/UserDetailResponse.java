@@ -1,6 +1,7 @@
 package com.peopleground.moida.user.presentation.dto.response;
 
 import com.peopleground.moida.user.domain.entity.User;
+import com.peopleground.moida.user.domain.entity.UserRole;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ public record UserDetailResponse(
     String nickname,
     String userEmail,
     String address,
+    UserRole role,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
@@ -21,6 +23,7 @@ public record UserDetailResponse(
             user.getNickname(),
             user.getUserEmail(),
             user.getAddress(),
+            user.getRole(),
             user.getCreatedDate(),
             user.getLastModifiedDate()
         );
