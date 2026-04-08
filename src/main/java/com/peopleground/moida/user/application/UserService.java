@@ -70,7 +70,7 @@ public class UserService {
             if (!passwordEncoder.matches(req.currentPassword(), user.getPassword())) {
                 throw new AppException(UserErrorCode.INVALID_CURRENT_PASSWORD);
             }
-            encodedNewPassword = passwordEncoder.encode(req.currentPassword());
+            encodedNewPassword = passwordEncoder.encode(req.newPassword());
         }
 
         String address = req.address() != null ? req.address() : user.getAddress();
