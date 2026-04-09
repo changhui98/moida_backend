@@ -49,6 +49,8 @@ public class AdminController {
         @PathVariable String username
     ) {
         adminService.deleteUserForAdmin(username);
+
+        return ResponseEntity.noContent().build();
     }
 
 
