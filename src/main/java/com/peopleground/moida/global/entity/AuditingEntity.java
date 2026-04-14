@@ -18,18 +18,18 @@ public class AuditingEntity extends BaseEntity{
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, length = 50)
-    protected UUID createdBy;
+    protected String createdBy;
 
     @LastModifiedBy
     @Column(name = "last_modified_by", length = 50)
-    protected UUID lastModifiedBy;
+    protected String lastModifiedBy;
 
     @Column(name = "deleted_by", length = 50)
-    protected UUID deletedBy;
+    protected String deletedBy;
 
     public void deleteBy(User user) {
         this.deletedDate = LocalDateTime.now();
-        this.deletedBy = user.getId();
+        this.deletedBy = user.getUsername();
     }
 
 }
