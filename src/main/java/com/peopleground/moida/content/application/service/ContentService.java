@@ -4,12 +4,16 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.content.presentation.dto.request.ContentCreateRequest;
 import com.peopleground.moida.content.presentation.dto.response.ContentCreateResponse;
+import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
+import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.global.exception.AppException;
 import com.peopleground.moida.user.domain.UserErrorCode;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,13 @@ public class ContentService {
         User findUser = getUser(user);
 
         return ContentCreateResponse.from(contentRepository.save(Content.of(req.title(), req.body(), findUser)));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ContentResponse> getContents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return PageResponse.from(contentRepository.findAllContents(pageable).map(ContentResponse::from));
     }
 
     private User getUser(CustomUser user) {
