@@ -3,6 +3,8 @@ package com.peopleground.moida.content.infrastructure.repository;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -10,10 +12,17 @@ import org.springframework.stereotype.Repository;
 public class ContentRepositoryImpl implements ContentRepository {
 
     private final ContentJpaRepository contentJpaRepository;
+    private final ContentQueryRepository contentQueryRepository;
 
     @Override
     public Content save(Content content) {
 
         return contentJpaRepository.save(content);
+    }
+
+    @Override
+    public Page<Content> findAllContents(Pageable pageable) {
+
+        return contentQueryRepository.findAllContents(pageable);
     }
 }
