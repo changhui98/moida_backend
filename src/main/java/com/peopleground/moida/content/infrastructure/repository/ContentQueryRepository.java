@@ -4,6 +4,7 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.entity.QContent;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,6 +16,21 @@ import org.springframework.stereotype.Repository;
 public class ContentQueryRepository {
 
     private final JPAQueryFactory queryFactory;
+
+    public Optional<Content> findById(Long id) {
+
+        QContent content = QContent.content;
+
+        return Optional.ofNullable(
+            queryFactory
+                .selectFrom(content)
+                .where(
+                    content.id.eq(id),
+                    content.deletedDate.isNull()
+                )
+                .fetchOne()
+        );
+    }
 
     public Page<Content> findAllContents(Pageable pageable) {
 

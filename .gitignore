@@ -61,3 +61,4 @@ coverage/
 *.crt
 *.p12
 *.jks
+CLAUDE.*

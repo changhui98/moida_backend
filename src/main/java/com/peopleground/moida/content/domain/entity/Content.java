@@ -48,4 +48,9 @@ public class Content extends AuditingEntity {
         content.user = user;
         return content;
     }
+
+    public void update(String title, String body) {
+        this.title = title;
+        this.body = body;
+    }
 }
