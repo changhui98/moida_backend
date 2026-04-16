@@ -1,10 +1,13 @@
 package com.peopleground.moida.content.application.service;
 
+import com.peopleground.moida.content.domain.ContentErrorCode;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.content.presentation.dto.request.ContentCreateRequest;
+import com.peopleground.moida.content.presentation.dto.request.ContentUpdateRequest;
 import com.peopleground.moida.content.presentation.dto.response.ContentCreateResponse;
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
+import com.peopleground.moida.content.presentation.dto.response.ContentUpdateResponse;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.global.exception.AppException;
@@ -30,6 +33,21 @@ public class ContentService {
         User findUser = getUser(user);
 
         return ContentCreateResponse.from(contentRepository.save(Content.of(req.title(), req.body(), findUser)));
+    }
+
+    @Transactional
+    public ContentUpdateResponse updateContent(Long contentId, ContentUpdateRequest req, CustomUser customUser) {
+
+        Content content = contentRepository.findById(contentId)
+            .orElseThrow(() -> new AppException(ContentErrorCode.CONTENT_NOT_FOUND));
+
+        if (!content.getUser().getUsername().equals(customUser.getUsername())) {
+            throw new AppException(ContentErrorCode.CONTENT_FORBIDDEN);
+        }
+
+        content.update(req.title(), req.body());
+
+        return ContentUpdateResponse.from(content);
     }
 
     @Transactional(readOnly = true)
