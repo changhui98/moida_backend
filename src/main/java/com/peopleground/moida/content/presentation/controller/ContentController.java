@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +29,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class ContentController {
 
     private final ContentService contentService;
+
+    @GetMapping
+    public ResponseEntity<PageResponse<ContentResponse>> getContents(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        PageResponse<ContentResponse> res = contentService.getContents(page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
 
     @PostMapping
     public ResponseEntity<ContentCreateResponse> contentCreate(
@@ -48,13 +58,13 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
-    @GetMapping
-    public ResponseEntity<PageResponse<ContentResponse>> getContents(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+    @DeleteMapping("/{contentId}")
+    public ResponseEntity<Void> deleteContent(
+        @PathVariable Long contentId,
+        @AuthenticationPrincipal CustomUser user
     ) {
-        PageResponse<ContentResponse> res = contentService.getContents(page, size);
-        return ResponseEntity.status(HttpStatus.OK).body(res);
+        contentService.deleteContent(contentId, user);
+        return ResponseEntity.noContent().build();
     }
 
 }

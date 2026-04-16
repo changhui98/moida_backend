@@ -35,8 +35,30 @@ public class ContentService {
         return ContentCreateResponse.from(contentRepository.save(Content.of(req.title(), req.body(), findUser)));
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<ContentResponse> getContents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        return PageResponse.from(contentRepository.findAllContents(pageable).map(ContentResponse::from));
+    }
+
     @Transactional
     public ContentUpdateResponse updateContent(Long contentId, ContentUpdateRequest req, CustomUser customUser) {
+
+        Content content = getContentByOwner(contentId, customUser);
+        content.update(req.title(), req.body());
+
+        return ContentUpdateResponse.from(content);
+    }
+
+    @Transactional
+    public void deleteContent(Long contentId, CustomUser customUser) {
+
+        Content content = getContentByOwner(contentId, customUser);
+        content.delete();
+    }
+
+    private Content getContentByOwner(Long contentId, CustomUser customUser) {
 
         Content content = contentRepository.findById(contentId)
             .orElseThrow(() -> new AppException(ContentErrorCode.CONTENT_NOT_FOUND));
@@ -45,21 +67,12 @@ public class ContentService {
             throw new AppException(ContentErrorCode.CONTENT_FORBIDDEN);
         }
 
-        content.update(req.title(), req.body());
-
-        return ContentUpdateResponse.from(content);
-    }
-
-    @Transactional(readOnly = true)
-    public PageResponse<ContentResponse> getContents(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-
-        return PageResponse.from(contentRepository.findAllContents(pageable).map(ContentResponse::from));
+        return content;
     }
 
     private User getUser(CustomUser user) {
 
-        return  userRepository.findByUsername(user.getUsername())
-                .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+        return userRepository.findByUsername(user.getUsername())
+            .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
     }
 }
