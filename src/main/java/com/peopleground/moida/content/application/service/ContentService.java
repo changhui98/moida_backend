@@ -5,6 +5,7 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.content.presentation.dto.request.ContentCreateRequest;
 import com.peopleground.moida.content.presentation.dto.request.ContentUpdateRequest;
+import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import com.peopleground.moida.content.presentation.dto.response.ContentCreateResponse;
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
 import com.peopleground.moida.content.presentation.dto.response.ContentUpdateResponse;
@@ -36,8 +37,14 @@ public class ContentService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ContentResponse> getContents(int page, int size) {
+    public PageResponse<ContentResponse> getContents(int page, int size, String keyword, SearchType searchType) {
         Pageable pageable = PageRequest.of(page, size);
+
+        if (keyword != null && !keyword.isBlank()) {
+            return PageResponse.from(
+                contentRepository.searchContents(keyword, searchType, pageable).map(ContentResponse::from)
+            );
+        }
 
         return PageResponse.from(contentRepository.findAllContents(pageable).map(ContentResponse::from));
     }

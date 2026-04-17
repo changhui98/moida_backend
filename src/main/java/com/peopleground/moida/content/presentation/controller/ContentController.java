@@ -3,6 +3,7 @@ package com.peopleground.moida.content.presentation.controller;
 import com.peopleground.moida.content.application.service.ContentService;
 import com.peopleground.moida.content.presentation.dto.request.ContentCreateRequest;
 import com.peopleground.moida.content.presentation.dto.request.ContentUpdateRequest;
+import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import com.peopleground.moida.content.presentation.dto.response.ContentCreateResponse;
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
 import com.peopleground.moida.content.presentation.dto.response.ContentUpdateResponse;
@@ -33,9 +34,11 @@ public class ContentController {
     @GetMapping
     public ResponseEntity<PageResponse<ContentResponse>> getContents(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false, defaultValue = "TITLE") SearchType searchType
     ) {
-        PageResponse<ContentResponse> res = contentService.getContents(page, size);
+        PageResponse<ContentResponse> res = contentService.getContents(page, size, keyword, searchType);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 

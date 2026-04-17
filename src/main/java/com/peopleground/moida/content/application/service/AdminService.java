@@ -4,6 +4,7 @@ import com.peopleground.moida.content.domain.ContentErrorCode;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.content.presentation.dto.request.AdminContentUpdateRequest;
+import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import com.peopleground.moida.content.presentation.dto.response.AdminContentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
@@ -17,7 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
+@Service("contentAdminService")
 @RequiredArgsConstructor
 public class AdminService {
 
@@ -25,8 +26,15 @@ public class AdminService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public PageResponse<AdminContentResponse> getAllContents(int page, int size) {
+    public PageResponse<AdminContentResponse> getAllContents(int page, int size, String keyword, SearchType searchType) {
         Pageable pageable = PageRequest.of(page, size);
+
+        if (keyword != null && !keyword.isBlank()) {
+            return PageResponse.from(
+                contentRepository.searchContentsIncludingDeleted(keyword, searchType, pageable)
+                    .map(AdminContentResponse::from)
+            );
+        }
 
         return PageResponse.from(
             contentRepository.findAllContentsIncludingDeleted(pageable)
