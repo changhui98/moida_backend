@@ -53,4 +53,9 @@ public class Content extends AuditingEntity {
         this.title = title;
         this.body = body;
     }
+
+    public void restore() {
+        this.deletedDate = null;
+        this.deletedBy = null;
+    }
 }
