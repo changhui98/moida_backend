@@ -32,6 +32,18 @@ public class ContentQueryRepository {
         );
     }
 
+    public Optional<Content> findByIdIncludingDeleted(Long id) {
+
+        QContent content = QContent.content;
+
+        return Optional.ofNullable(
+            queryFactory
+                .selectFrom(content)
+                .where(content.id.eq(id))
+                .fetchOne()
+        );
+    }
+
     public Page<Content> findAllContents(Pageable pageable) {
 
         QContent content = QContent.content;

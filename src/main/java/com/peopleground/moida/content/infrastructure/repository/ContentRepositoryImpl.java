@@ -28,6 +28,12 @@ public class ContentRepositoryImpl implements ContentRepository {
     }
 
     @Override
+    public Optional<Content> findByIdIncludingDeleted(Long id) {
+
+        return contentQueryRepository.findByIdIncludingDeleted(id);
+    }
+
+    @Override
     public Page<Content> findAllContents(Pageable pageable) {
 
         return contentQueryRepository.findAllContents(pageable);

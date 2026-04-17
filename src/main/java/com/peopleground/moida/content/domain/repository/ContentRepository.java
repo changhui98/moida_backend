@@ -11,6 +11,8 @@ public interface ContentRepository {
 
     Optional<Content> findById(Long id);
 
+    Optional<Content> findByIdIncludingDeleted(Long id);
+
     Page<Content> findAllContents(Pageable pageable);
 
     Page<Content> findAllContentsIncludingDeleted(Pageable pageable);
