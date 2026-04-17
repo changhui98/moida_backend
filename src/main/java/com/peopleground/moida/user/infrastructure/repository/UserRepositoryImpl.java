@@ -49,4 +49,16 @@ public class UserRepositoryImpl implements UserRepository {
     public User updateProfile(User updateUser) {
         return userJpaRepository.save(updateUser);
     }
+
+    @Override
+    public Optional<User> findByUserEmail(String email) {
+
+        return userJpaRepository.findByUserEmail(email);
+    }
+
+    @Override
+    public boolean existsByUserEmail(String email) {
+
+        return userJpaRepository.existsByUserEmail(email);
+    }
 }

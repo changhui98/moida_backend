@@ -17,12 +17,14 @@ public class CustomUser implements UserDetails {
     private final String username;
     private final String password;
     private final UserRole role;
+    private final boolean emailVerified;
 
-    public CustomUser(UUID id, String username, String password, UserRole role) {
+    public CustomUser(UUID id, String username, String password, UserRole role, boolean emailVerified) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
+        this.emailVerified = emailVerified;
     }
 
     @Override

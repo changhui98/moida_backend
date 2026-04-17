@@ -18,4 +18,8 @@ public interface UserRepository {
     Page<User> findAllUserForAdmin(Pageable pageable);
 
     User updateProfile(User updateUser);
+
+    Optional<User> findByUserEmail(String email);
+
+    boolean existsByUserEmail(String email);
 }

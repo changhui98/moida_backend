@@ -23,12 +23,14 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GeocodingClient geocodingClient;
+    private final EmailVerificationService emailVerificationService;
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Transactional
     public UserCreateResponse signUp(UserCreateRequest request) {
 
         validateDuplicateUsername(request.username());
+        validateDuplicateEmail(request.userEmail());
 
         Point point;
 
@@ -50,7 +52,16 @@ public class AuthService {
 
         User saveUser = userRepository.save(user);
 
+        emailVerificationService.sendVerificationEmail(saveUser.getUserEmail());
+
         return UserCreateResponse.from(saveUser);
+    }
+
+    private void validateDuplicateEmail(String userEmail) {
+
+        if (userRepository.existsByUserEmail(userEmail)) {
+            throw new AppException(UserErrorCode.DUPLICATE_EMAIL);
+        }
     }
 
     private void validateDuplicateUsername(String username) {
