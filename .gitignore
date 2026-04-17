@@ -61,4 +61,9 @@ coverage/
 *.crt
 *.p12
 *.jks
-CLAUDE.*
+
+# ===============================
+# 🤖 Claude Code
+# ===============================
+.claude/
+CLAUDE.md
