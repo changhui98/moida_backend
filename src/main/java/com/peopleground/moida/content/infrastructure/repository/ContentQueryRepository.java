@@ -52,4 +52,23 @@ public class ContentQueryRepository {
 
         return new PageImpl<>(contents, pageable, total != null ? total : 0);
     }
+
+    public Page<Content> findAllContentsIncludingDeleted(Pageable pageable) {
+
+        QContent content = QContent.content;
+
+        List<Content> contents = queryFactory
+            .selectFrom(content)
+            .orderBy(content.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(content.count())
+            .from(content)
+            .fetchOne();
+
+        return new PageImpl<>(contents, pageable, total != null ? total : 0);
+    }
 }
