@@ -32,4 +32,10 @@ public class ContentRepositoryImpl implements ContentRepository {
 
         return contentQueryRepository.findAllContents(pageable);
     }
+
+    @Override
+    public Page<Content> findAllContentsIncludingDeleted(Pageable pageable) {
+
+        return contentQueryRepository.findAllContentsIncludingDeleted(pageable);
+    }
 }

@@ -1,0 +1,33 @@
+package com.peopleground.moida.content.presentation.dto.response;
+
+import com.peopleground.moida.content.domain.entity.Content;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+public record AdminContentResponse(
+    Long id,
+    String title,
+    String body,
+    UUID userId,
+    String createdBy,
+    LocalDateTime createdDate,
+    String lastModifiedBy,
+    LocalDateTime lastModifiedDate,
+    String deletedBy,
+    LocalDateTime deletedDate
+) {
+    public static AdminContentResponse from(Content content) {
+        return new AdminContentResponse(
+            content.getId(),
+            content.getTitle(),
+            content.getBody(),
+            content.getUser().getId(),
+            content.getCreatedBy(),
+            content.getCreatedDate(),
+            content.getLastModifiedBy(),
+            content.getLastModifiedDate(),
+            content.getDeletedBy(),
+            content.getDeletedDate()
+        );
+    }
+}
