@@ -58,9 +58,20 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         HttpServletResponse response, FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
 
-        UUID id = ((CustomUser) authResult.getPrincipal()).getId();
-        String username = ((CustomUser) authResult.getPrincipal()).getUsername();
-        UserRole role = ((CustomUser) authResult.getPrincipal()).getRole();
+        CustomUser customUser = (CustomUser) authResult.getPrincipal();
+
+        if (!customUser.isEmailVerified()) {
+            response.setStatus(UserErrorCode.EMAIL_NOT_VERIFIED.getStatus().value());
+            response.setContentType("application/json;charset=UTF-8");
+
+            ErrorResponse errorResponse = ErrorResponse.from(UserErrorCode.EMAIL_NOT_VERIFIED);
+            objectMapper.writeValue(response.getOutputStream(), errorResponse);
+            return;
+        }
+
+        UUID id = customUser.getId();
+        String username = customUser.getUsername();
+        UserRole role = customUser.getRole();
 
         String token = jwtTokenProvider.createToken(id, username, role);
         response.addHeader(AUTHORIZATION_HEADER, token);

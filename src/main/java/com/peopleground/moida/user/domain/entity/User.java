@@ -49,6 +49,9 @@ public class User extends BaseEntity {
     @Column(nullable = false, columnDefinition = "geography(Point,4326)")
     private Point location;
 
+    @Column(nullable = false)
+    private boolean emailVerified = false;
+
     public static User of
         (
             String username,
@@ -67,6 +70,10 @@ public class User extends BaseEntity {
         user.address = address;
         user.location = location;
         return user;
+    }
+
+    public void verifyEmail() {
+        this.emailVerified = true;
     }
 
     public User updateUser

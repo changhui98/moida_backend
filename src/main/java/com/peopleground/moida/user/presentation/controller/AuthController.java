@@ -1,9 +1,13 @@
 package com.peopleground.moida.user.presentation.controller;
 
 import com.peopleground.moida.user.application.AuthService;
+import com.peopleground.moida.user.application.EmailVerificationService;
+import com.peopleground.moida.user.presentation.dto.request.EmailResendRequest;
+import com.peopleground.moida.user.presentation.dto.request.EmailVerifyRequest;
 import com.peopleground.moida.user.presentation.dto.request.UserCreateRequest;
 import com.peopleground.moida.user.presentation.dto.response.UserCreateResponse;
 import jakarta.validation.Valid;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService emailVerificationService;
 
     @PostMapping("/sign-up")
     public ResponseEntity<UserCreateResponse> signUp(
@@ -26,6 +31,24 @@ public class AuthController {
         UserCreateResponse res = authService.signUp(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+
+    @PostMapping("/email/verify")
+    public ResponseEntity<Map<String, String>> verifyEmail(
+        @RequestBody @Valid EmailVerifyRequest request
+    ) {
+        emailVerificationService.verifyCode(request.userEmail(), request.code());
+
+        return ResponseEntity.ok(Map.of("message", "이메일 인증이 완료되었습니다."));
+    }
+
+    @PostMapping("/email/resend")
+    public ResponseEntity<Map<String, String>> resendVerificationEmail(
+        @RequestBody @Valid EmailResendRequest request
+    ) {
+        emailVerificationService.resendCode(request.userEmail());
+
+        return ResponseEntity.ok(Map.of("message", "인증코드가 재발송되었습니다."));
     }
 
 }
