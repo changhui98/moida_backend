@@ -2,6 +2,7 @@ package com.peopleground.moida.content.presentation.controller;
 
 import com.peopleground.moida.content.application.service.AdminService;
 import com.peopleground.moida.content.presentation.dto.request.AdminContentUpdateRequest;
+import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import com.peopleground.moida.content.presentation.dto.response.AdminContentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController("contentAdminController")
 @RequestMapping("/api/v1/admin/contents")
 @RequiredArgsConstructor
 public class AdminController {
@@ -31,9 +32,11 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<PageResponse<AdminContentResponse>> getAllContents(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false, defaultValue = "TITLE") SearchType searchType
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(adminService.getAllContents(page, size));
+        return ResponseEntity.status(HttpStatus.OK).body(adminService.getAllContents(page, size, keyword, searchType));
     }
 
     @GetMapping("/{contentId}")
