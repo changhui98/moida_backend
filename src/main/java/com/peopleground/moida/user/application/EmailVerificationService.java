@@ -2,8 +2,10 @@ package com.peopleground.moida.user.application;
 
 import com.peopleground.moida.global.exception.AppException;
 import com.peopleground.moida.user.domain.UserErrorCode;
+import com.peopleground.moida.user.domain.entity.EmailVerificationTemp;
 import com.peopleground.moida.user.domain.entity.EmailVerificationToken;
 import com.peopleground.moida.user.domain.entity.User;
+import com.peopleground.moida.user.domain.repository.EmailVerificationTempRepository;
 import com.peopleground.moida.user.domain.repository.EmailVerificationTokenRepository;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmailVerificationService {
 
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
+    private final EmailVerificationTempRepository emailVerificationTempRepository;
     private final UserRepository userRepository;
     private final EmailSender emailSender;
 
@@ -70,26 +73,60 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public void resendCode(String userEmail) {
+    public void sendVerificationBeforeSignUp(String email) {
 
-        User user = userRepository.findByUserEmail(userEmail).orElseThrow(
-            () -> new AppException(UserErrorCode.USER_NOT_FOUND)
-        );
+        Optional<EmailVerificationTemp> existing = emailVerificationTempRepository.findByEmail(email);
 
-        if (user.isEmailVerified()) {
-            throw new AppException(UserErrorCode.EMAIL_ALREADY_VERIFIED);
-        }
-
-        Optional<EmailVerificationToken> existingToken =
-            emailVerificationTokenRepository.findByUserEmail(userEmail);
-
-        if (existingToken.isPresent()) {
+        if (existing.isPresent()) {
             LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(1);
-            if (existingToken.get().getCreatedAt().isAfter(oneMinuteAgo)) {
+            if (existing.get().getCreatedAt().isAfter(oneMinuteAgo)) {
                 throw new AppException(UserErrorCode.VERIFICATION_CODE_RESEND_TOO_SOON);
             }
+            emailVerificationTempRepository.deleteByEmail(email);
         }
 
-        sendVerificationEmail(userEmail);
+        String code = String.format("%06d", new Random().nextInt(1000000));
+        EmailVerificationTemp temp = EmailVerificationTemp.of(email, code);
+        emailVerificationTempRepository.save(temp);
+
+        emailSender.sendVerificationEmail(email, code);
+    }
+
+    @Transactional
+    public void verifyCodeBeforeSignUp(String email, String code) {
+
+        EmailVerificationTemp temp = emailVerificationTempRepository.findByEmail(email)
+            .orElseThrow(() -> new AppException(UserErrorCode.INVALID_VERIFICATION_CODE));
+
+        if (temp.isExpired()) {
+            emailVerificationTempRepository.deleteByEmail(email);
+            throw new AppException(UserErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        if (!temp.getCode().equals(code)) {
+            throw new AppException(UserErrorCode.INVALID_VERIFICATION_CODE);
+        }
+
+        temp.markVerified();
+        emailVerificationTempRepository.save(temp);
+    }
+
+    public void checkPreVerified(String email) {
+        EmailVerificationTemp temp = emailVerificationTempRepository.findByEmail(email)
+            .orElseThrow(() -> new AppException(UserErrorCode.EMAIL_NOT_PRE_VERIFIED));
+
+        if (!temp.isVerified()) {
+            throw new AppException(UserErrorCode.EMAIL_NOT_PRE_VERIFIED);
+        }
+    }
+
+    @Transactional
+    public void deletePreVerification(String email) {
+        emailVerificationTempRepository.deleteByEmail(email);
+    }
+
+    @Transactional
+    public void resendCode(String email) {
+        sendVerificationBeforeSignUp(email);
     }
 }

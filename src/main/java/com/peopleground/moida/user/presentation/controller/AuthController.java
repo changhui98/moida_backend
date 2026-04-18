@@ -4,6 +4,7 @@ import com.peopleground.moida.user.application.AuthService;
 import com.peopleground.moida.user.application.EmailVerificationService;
 import com.peopleground.moida.user.presentation.dto.request.EmailResendRequest;
 import com.peopleground.moida.user.presentation.dto.request.EmailVerifyRequest;
+import com.peopleground.moida.user.presentation.dto.request.SendVerificationRequest;
 import com.peopleground.moida.user.presentation.dto.request.UserCreateRequest;
 import com.peopleground.moida.user.presentation.dto.response.UserCreateResponse;
 import jakarta.validation.Valid;
@@ -33,11 +34,20 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
+    @PostMapping("/email/send-verification")
+    public ResponseEntity<Map<String, String>> sendVerification(
+        @RequestBody @Valid SendVerificationRequest request
+    ) {
+        emailVerificationService.sendVerificationBeforeSignUp(request.email());
+
+        return ResponseEntity.ok(Map.of("message", "인증 코드가 발송되었습니다."));
+    }
+
     @PostMapping("/email/verify")
     public ResponseEntity<Map<String, String>> verifyEmail(
         @RequestBody @Valid EmailVerifyRequest request
     ) {
-        emailVerificationService.verifyCode(request.userEmail(), request.code());
+        emailVerificationService.verifyCodeBeforeSignUp(request.email(), request.code());
 
         return ResponseEntity.ok(Map.of("message", "이메일 인증이 완료되었습니다."));
     }
@@ -46,7 +56,7 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> resendVerificationEmail(
         @RequestBody @Valid EmailResendRequest request
     ) {
-        emailVerificationService.resendCode(request.userEmail());
+        emailVerificationService.resendCode(request.email());
 
         return ResponseEntity.ok(Map.of("message", "인증코드가 재발송되었습니다."));
     }
