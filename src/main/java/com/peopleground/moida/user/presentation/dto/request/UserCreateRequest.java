@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Size;
 public record UserCreateRequest(
     @NotBlank(message = "회원이름(아이디)은 필수입니다.")
     @Pattern(
-        regexp = "^[a-zA-Z]+$",
-        message = "username은 영어만 입력 가능합니다."
+        regexp = "^[a-zA-Z0-9]+$",
+        message = "username은 영어와 숫자만 입력 가능합니다."
     )
     String username,
 
