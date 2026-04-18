@@ -32,6 +32,8 @@ public class AuthService {
         validateDuplicateUsername(request.username());
         validateDuplicateEmail(request.userEmail());
 
+        emailVerificationService.checkPreVerified(request.userEmail());
+
         Point point;
 
         GeoPoint geo = geocodingClient.convert(request.address());
@@ -51,8 +53,9 @@ public class AuthService {
         );
 
         User saveUser = userRepository.save(user);
+        user.verifyEmail();
 
-        emailVerificationService.sendVerificationEmail(saveUser.getUserEmail());
+        emailVerificationService.deletePreVerification(saveUser.getUserEmail());
 
         return UserCreateResponse.from(saveUser);
     }

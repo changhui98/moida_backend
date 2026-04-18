@@ -19,7 +19,8 @@ public enum UserErrorCode implements ErrorCode {
     INVALID_VERIFICATION_CODE(HttpStatus.BAD_REQUEST, "U008", "인증 코드가 올바르지 않거나 만료되었습니다."),
     VERIFICATION_CODE_RESEND_TOO_SOON(HttpStatus.TOO_MANY_REQUESTS, "U009", "인증 코드 재발송은 1분 후에 가능합니다."),
     EMAIL_ALREADY_VERIFIED(HttpStatus.BAD_REQUEST, "U010", "이미 인증된 이메일입니다."),
-    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "U011", "이미 사용 중인 이메일입니다.")
+    DUPLICATE_EMAIL(HttpStatus.CONFLICT, "U011", "이미 사용 중인 이메일입니다."),
+    EMAIL_NOT_PRE_VERIFIED(HttpStatus.BAD_REQUEST, "U012", "이메일 사전 인증이 완료되지 않았습니다.")
     ;
 
     private final HttpStatus status;
