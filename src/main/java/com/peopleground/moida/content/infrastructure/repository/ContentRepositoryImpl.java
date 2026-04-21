@@ -3,6 +3,8 @@ package com.peopleground.moida.content.infrastructure.repository;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.content.presentation.dto.request.SearchType;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,5 +58,11 @@ public class ContentRepositoryImpl implements ContentRepository {
     public Page<Content> searchContentsIncludingDeleted(String keyword, SearchType searchType, Pageable pageable) {
 
         return contentQueryRepository.searchContentsIncludingDeleted(keyword, searchType, pageable);
+    }
+
+    @Override
+    public Map<String, Long> countMonthlyCreations(LocalDateTime windowStart) {
+
+        return contentQueryRepository.countMonthlyCreations(windowStart);
     }
 }
