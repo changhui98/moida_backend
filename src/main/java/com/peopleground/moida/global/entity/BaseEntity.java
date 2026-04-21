@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.Getter;
 
@@ -22,17 +23,18 @@ public class BaseEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.createdDate = LocalDateTime.now();
-        this.lastModifiedDate = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(Clock.systemUTC());
+        this.createdDate = now;
+        this.lastModifiedDate = now;
     }
 
     @PreUpdate
     protected void onUpdate() {
-        this.lastModifiedDate = LocalDateTime.now();
+        this.lastModifiedDate = LocalDateTime.now(Clock.systemUTC());
     }
 
     public void delete() {
-        this.deletedDate = LocalDateTime.now();
+        this.deletedDate = LocalDateTime.now(Clock.systemUTC());
     }
 
     public boolean isDeleted() {
