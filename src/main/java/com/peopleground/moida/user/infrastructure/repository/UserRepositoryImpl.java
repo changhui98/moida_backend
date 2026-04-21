@@ -2,6 +2,8 @@ package com.peopleground.moida.user.infrastructure.repository;
 
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -60,5 +62,11 @@ public class UserRepositoryImpl implements UserRepository {
     public boolean existsByUserEmail(String email) {
 
         return userJpaRepository.existsByUserEmail(email);
+    }
+
+    @Override
+    public Map<String, Long> countMonthlySignups(LocalDateTime windowStart) {
+
+        return userQueryRepository.countMonthlySignups(windowStart);
     }
 }
