@@ -5,9 +5,16 @@ import com.peopleground.moida.content.domain.entity.QContent;
 import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import com.peopleground.moida.user.domain.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -136,6 +143,38 @@ public class ContentQueryRepository {
             .fetchOne();
 
         return new PageImpl<>(contents, pageable, total != null ? total : 0);
+    }
+
+    public Map<String, Long> countMonthlyCreations(LocalDateTime windowStart) {
+
+        QContent content = QContent.content;
+
+        // Hibernate HQL 파서가 함수 인자 내 `AT TIME ZONE` 을 허용하지 않으므로,
+        // UTC → KST 변환 + YYYY-MM 포맷을 묶은 커스텀 함수(to_char_kst_month)를 사용한다.
+        // 함수 등록: global.persistence.PostgresKstFunctionContributor
+        StringExpression monthExpr = Expressions.stringTemplate(
+            "function('to_char_kst_month', {0})", content.createdDate);
+
+        var countExpr = content.count();
+
+        List<Tuple> results = queryFactory
+            .select(monthExpr, countExpr)
+            .from(content)
+            .where(
+                content.deletedDate.isNull(),
+                content.createdDate.goe(windowStart)
+            )
+            .groupBy(monthExpr)
+            .orderBy(monthExpr.asc())
+            .fetch();
+
+        return results.stream()
+            .collect(Collectors.toMap(
+                t -> t.get(monthExpr),
+                t -> t.get(countExpr),
+                (a, b) -> a,
+                LinkedHashMap::new
+            ));
     }
 
     private BooleanBuilder buildSearchCondition(QContent content, QUser user, String keyword, SearchType searchType) {
