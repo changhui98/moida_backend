@@ -2,8 +2,15 @@ package com.peopleground.moida.user.infrastructure.repository;
 
 import com.peopleground.moida.user.domain.entity.QUser;
 import com.peopleground.moida.user.domain.entity.User;
+import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -52,5 +59,37 @@ public class UserQueryRepository {
             .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0);
+    }
+
+    public Map<String, Long> countMonthlySignups(LocalDateTime windowStart) {
+
+        QUser user = QUser.user;
+
+        // Hibernate HQL 파서가 함수 인자 내 `AT TIME ZONE` 을 허용하지 않으므로,
+        // UTC → KST 변환 + YYYY-MM 포맷을 묶은 커스텀 함수(to_char_kst_month)를 사용한다.
+        // 함수 등록: global.persistence.PostgresKstFunctionContributor
+        StringExpression monthExpr = Expressions.stringTemplate(
+            "function('to_char_kst_month', {0})", user.createdDate);
+
+        var countExpr = user.count();
+
+        List<Tuple> results = queryFactory
+            .select(monthExpr, countExpr)
+            .from(user)
+            .where(
+                user.deletedDate.isNull(),
+                user.createdDate.goe(windowStart)
+            )
+            .groupBy(monthExpr)
+            .orderBy(monthExpr.asc())
+            .fetch();
+
+        return results.stream()
+            .collect(Collectors.toMap(
+                t -> t.get(monthExpr),
+                t -> t.get(countExpr),
+                (a, b) -> a,
+                LinkedHashMap::new
+            ));
     }
 }
