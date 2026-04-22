@@ -12,10 +12,13 @@ import com.peopleground.moida.content.presentation.dto.response.ContentUpdateRes
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.tag.application.service.TagService;
 import com.peopleground.moida.user.domain.UserErrorCode;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,13 +30,22 @@ public class ContentService {
 
     private final ContentRepository contentRepository;
     private final UserRepository userRepository;
+    private final TagService tagService;
 
+    @CacheEvict(value = "contentList", allEntries = true)
     @Transactional
     public ContentCreateResponse contentCreate(ContentCreateRequest req, CustomUser user) {
 
         User findUser = getUser(user);
+        Content content = contentRepository.save(Content.of(req.title(), req.body(), findUser));
 
-        return ContentCreateResponse.from(contentRepository.save(Content.of(req.title(), req.body(), findUser)));
+        // 태그가 있는 경우 태그 연동 처리
+        List<String> tags = req.tags();
+        if (tags != null && !tags.isEmpty()) {
+            tagService.attachTagsToContent(content, tags);
+        }
+
+        return ContentCreateResponse.from(content);
     }
 
     @Transactional(readOnly = true)
@@ -61,19 +73,28 @@ public class ContentService {
         );
     }
 
+    @CacheEvict(value = "contentList", allEntries = true)
     @Transactional
     public ContentUpdateResponse updateContent(Long contentId, ContentUpdateRequest req, CustomUser customUser) {
 
         Content content = getContentByOwner(contentId, customUser);
         content.update(req.title(), req.body());
 
+        // tags 필드가 null이 아닌 경우 태그 교체 (null이면 태그 변경 없음)
+        if (req.tags() != null) {
+            tagService.updateContentTags(content, req.tags());
+        }
+
         return ContentUpdateResponse.from(content);
     }
 
+    @CacheEvict(value = "contentList", allEntries = true)
     @Transactional
     public void deleteContent(Long contentId, CustomUser customUser) {
 
         Content content = getContentByOwner(contentId, customUser);
+        // 게시글 소프트 삭제 시 태그 연결 데이터 정리
+        tagService.detachTagsFromContent(content);
         content.delete();
     }
 

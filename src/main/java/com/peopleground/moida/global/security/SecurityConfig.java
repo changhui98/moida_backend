@@ -8,6 +8,7 @@ import com.peopleground.moida.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -54,6 +55,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth ->
                 auth.requestMatchers("/api/v1/auth/**").permitAll()
+                    // 태그 관련 공개 API (비로그인 사용자도 태그 검색 가능)
+                    .requestMatchers("/api/v1/tags/**").permitAll()
+                    // 댓글 목록 조회 공개 API (비로그인 사용자도 댓글 조회 가능)
+                    .requestMatchers(HttpMethod.GET, "/api/v1/contents/*/comments").permitAll()
                     .anyRequest().authenticated())
 
             .exceptionHandling(e ->
