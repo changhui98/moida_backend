@@ -3,6 +3,7 @@ package com.peopleground.moida.comment.infrastructure.repository;
 import com.peopleground.moida.comment.domain.entity.Comment;
 import com.peopleground.moida.comment.domain.repository.CommentRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -35,7 +36,27 @@ public class CommentRepositoryImpl implements CommentRepository {
     }
 
     @Override
+    public Map<Long, List<Comment>> findRepliesGroupedByParentIds(List<Long> parentIds) {
+        return commentQueryRepository.findRepliesGroupedByParentIds(parentIds);
+    }
+
+    @Override
     public int countByContentId(Long contentId) {
         return commentQueryRepository.countByContentId(contentId);
+    }
+
+    @Override
+    public int incrementLikeCount(Long id) {
+        return commentJpaRepository.incrementLikeCount(id);
+    }
+
+    @Override
+    public int decrementLikeCount(Long id) {
+        return commentJpaRepository.decrementLikeCount(id);
+    }
+
+    @Override
+    public Integer findLikeCountById(Long id) {
+        return commentJpaRepository.findLikeCountById(id);
     }
 }

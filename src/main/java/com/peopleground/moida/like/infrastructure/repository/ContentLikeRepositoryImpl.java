@@ -32,4 +32,9 @@ public class ContentLikeRepositoryImpl implements ContentLikeRepository {
     public void delete(ContentLike contentLike) {
         contentLikeJpaRepository.delete(contentLike);
     }
+
+    @Override
+    public int insertIfNotExists(Long contentId, UUID userId) {
+        return contentLikeJpaRepository.insertIfNotExists(contentId, userId);
+    }
 }

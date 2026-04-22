@@ -31,14 +31,4 @@ public class Tag extends BaseEntity {
         tag.postCount = 0;
         return tag;
     }
-
-    public void incrementPostCount() {
-        this.postCount++;
-    }
-
-    public void decrementPostCount() {
-        if (this.postCount > 0) {
-            this.postCount--;
-        }
-    }
 }

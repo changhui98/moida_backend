@@ -21,5 +21,26 @@ public interface CommentRepository {
      */
     List<Comment> findRepliesByParentId(Long parentId);
 
+    /**
+     * 여러 부모 댓글의 대댓글을 한 번에 조회해 parentId 별로 그룹핑하여 반환한다.
+     * (N+1 방지용 배치 쿼리)
+     */
+    java.util.Map<Long, List<Comment>> findRepliesGroupedByParentIds(List<Long> parentIds);
+
     int countByContentId(Long contentId);
+
+    /**
+     * likeCount 원자적 1 증가.
+     */
+    int incrementLikeCount(Long id);
+
+    /**
+     * likeCount 원자적 1 감소 (0 미만 방지).
+     */
+    int decrementLikeCount(Long id);
+
+    /**
+     * 원자 UPDATE 직후 최신 likeCount 만 가볍게 재조회한다.
+     */
+    Integer findLikeCountById(Long id);
 }

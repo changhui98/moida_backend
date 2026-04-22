@@ -71,26 +71,6 @@ public class Content extends AuditingEntity {
         this.deletedBy = null;
     }
 
-    public void incrementLikeCount() {
-        this.likeCount++;
-    }
-
-    public void decrementLikeCount() {
-        if (this.likeCount > 0) {
-            this.likeCount--;
-        }
-    }
-
-    public void incrementCommentCount() {
-        this.commentCount++;
-    }
-
-    public void decrementCommentCount() {
-        if (this.commentCount > 0) {
-            this.commentCount--;
-        }
-    }
-
     public void syncViewCount(long viewCount) {
         this.viewCount = viewCount;
     }
