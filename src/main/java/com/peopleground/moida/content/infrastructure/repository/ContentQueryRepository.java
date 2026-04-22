@@ -3,6 +3,8 @@ package com.peopleground.moida.content.infrastructure.repository;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.entity.QContent;
 import com.peopleground.moida.content.presentation.dto.request.SearchType;
+import com.peopleground.moida.tag.domain.entity.QContentTag;
+import com.peopleground.moida.tag.domain.entity.QTag;
 import com.peopleground.moida.user.domain.entity.QUser;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -174,6 +176,43 @@ public class ContentQueryRepository {
             .from(content)
             .join(content.user, user)
             .where(condition)
+            .fetchOne();
+
+        return new PageImpl<>(contents, pageable, total != null ? total : 0);
+    }
+
+    /**
+     * 특정 태그명으로 게시글 목록을 조회한다.
+     * ContentTag 조인을 통해 태그가 연결된 삭제되지 않은 게시글만 반환한다.
+     */
+    public Page<Content> findAllByTagName(String tagName, Pageable pageable) {
+
+        QContent content = QContent.content;
+        QContentTag contentTag = QContentTag.contentTag;
+        QTag tag = QTag.tag;
+
+        List<Content> contents = queryFactory
+            .selectFrom(content)
+            .join(contentTag).on(contentTag.content.eq(content))
+            .join(contentTag.tag, tag)
+            .where(
+                tag.name.eq(tagName.toLowerCase()),
+                content.deletedDate.isNull()
+            )
+            .orderBy(content.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(content.count())
+            .from(content)
+            .join(contentTag).on(contentTag.content.eq(content))
+            .join(contentTag.tag, tag)
+            .where(
+                tag.name.eq(tagName.toLowerCase()),
+                content.deletedDate.isNull()
+            )
             .fetchOne();
 
         return new PageImpl<>(contents, pageable, total != null ? total : 0);

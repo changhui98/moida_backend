@@ -3,6 +3,7 @@ package com.peopleground.moida.content.domain.repository;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,10 @@ public interface ContentRepository {
     Page<Content> searchContents(String keyword, SearchType searchType, Pageable pageable);
 
     Page<Content> searchContentsIncludingDeleted(String keyword, SearchType searchType, Pageable pageable);
+
+    Page<Content> findAllByTagName(String tagName, Pageable pageable);
+
+    List<Content> findAllByIds(List<Long> ids);
 
     Map<String, Long> countMonthlyCreations(LocalDateTime windowStart);
 }

@@ -37,6 +37,15 @@ public class Content extends AuditingEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
+    private int likeCount = 0;
+
+    @Column(nullable = false)
+    private int commentCount = 0;
+
+    @Column(nullable = false)
+    private long viewCount = 0;
+
     public static Content of(
         String title,
         String body,
@@ -46,6 +55,9 @@ public class Content extends AuditingEntity {
         content.title = title;
         content.body = body;
         content.user = user;
+        content.likeCount = 0;
+        content.commentCount = 0;
+        content.viewCount = 0;
         return content;
     }
 
@@ -57,5 +69,29 @@ public class Content extends AuditingEntity {
     public void restore() {
         this.deletedDate = null;
         this.deletedBy = null;
+    }
+
+    public void incrementLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decrementLikeCount() {
+        if (this.likeCount > 0) {
+            this.likeCount--;
+        }
+    }
+
+    public void incrementCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decrementCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount--;
+        }
+    }
+
+    public void syncViewCount(long viewCount) {
+        this.viewCount = viewCount;
     }
 }

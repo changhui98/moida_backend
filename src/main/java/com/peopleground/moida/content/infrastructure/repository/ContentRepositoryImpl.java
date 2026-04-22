@@ -4,6 +4,7 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.content.presentation.dto.request.SearchType;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +65,17 @@ public class ContentRepositoryImpl implements ContentRepository {
     public Page<Content> searchContentsIncludingDeleted(String keyword, SearchType searchType, Pageable pageable) {
 
         return contentQueryRepository.searchContentsIncludingDeleted(keyword, searchType, pageable);
+    }
+
+    @Override
+    public Page<Content> findAllByTagName(String tagName, Pageable pageable) {
+
+        return contentQueryRepository.findAllByTagName(tagName, pageable);
+    }
+
+    @Override
+    public List<Content> findAllByIds(List<Long> ids) {
+        return contentJpaRepository.findAllById(ids);
     }
 
     @Override
