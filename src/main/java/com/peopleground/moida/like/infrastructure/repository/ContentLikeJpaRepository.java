@@ -1,6 +1,8 @@
 package com.peopleground.moida.like.infrastructure.repository;
 
 import com.peopleground.moida.like.domain.entity.ContentLike;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +15,20 @@ public interface ContentLikeJpaRepository extends JpaRepository<ContentLike, Lon
     Optional<ContentLike> findByContentIdAndUserId(Long contentId, UUID userId);
 
     boolean existsByContentIdAndUserId(Long contentId, UUID userId);
+
+    /**
+     * 특정 사용자가 좋아요 누른 게시글 id 만 배치로 조회한다.
+     *
+     * <p>리스트/검색 조회 시 N+1 을 피하기 위해 게시글 id 집합을 한 번에 내려,
+     * 해당 사용자의 좋아요 row 가 존재하는 contentId 만 뽑아 반환한다.
+     * 호출부는 반환된 Set 을 {@code contains(id)} 로 likedByMe 플래그를 채우면 된다.</p>
+     */
+    @Query("SELECT cl.content.id FROM p_content_like cl "
+        + "WHERE cl.user.id = :userId AND cl.content.id IN :contentIds")
+    List<Long> findLikedContentIds(
+        @Param("userId") UUID userId,
+        @Param("contentIds") Collection<Long> contentIds
+    );
 
     /**
      * PostgreSQL ON CONFLICT DO NOTHING 패턴으로 동시성-안전 삽입을 수행한다.
