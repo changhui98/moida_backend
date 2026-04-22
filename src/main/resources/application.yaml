@@ -37,6 +37,16 @@ spring:
           starttls:
             enable: true
 
+  ## Redis - 조회수/좋아요 카운트/인기 태그/게시글 목록 캐싱용
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  ## Spring Cache 설정
+  cache:
+    type: redis
+
 ## p6spy
 decorator:
   datasource:

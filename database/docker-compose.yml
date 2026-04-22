@@ -12,5 +12,16 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./initdb:/docker-entrypoint-initdb.d
 
+  # Redis 7 - 조회수 Write-through, 좋아요 카운트, 인기 태그, 게시글 목록 캐싱용
+  redis:
+    image: redis:7-alpine
+    container_name: moida-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes  # AOF 지속성 활성화
+
 volumes:
   postgres_data:
+  redis_data:
