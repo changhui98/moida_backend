@@ -7,7 +7,6 @@ import com.peopleground.moida.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class AdminStatsService {
 
         YearMonth now = YearMonth.now(KST);
         YearMonth startMonth = now.minusMonths(months - 1);
-        LocalDateTime windowStart = toUtcLocalDateTime(startMonth);
+        LocalDateTime windowStart = startMonth.atDay(1).atStartOfDay();
 
         Map<String, Long> dbResult = userRepository.countMonthlySignups(windowStart);
 
@@ -43,17 +42,12 @@ public class AdminStatsService {
 
         YearMonth now = YearMonth.now(KST);
         YearMonth startMonth = now.minusMonths(months - 1);
-        LocalDateTime windowStart = toUtcLocalDateTime(startMonth);
+        LocalDateTime windowStart = startMonth.atDay(1).atStartOfDay();
 
         Map<String, Long> dbResult = contentRepository.countMonthlyCreations(windowStart);
 
         List<MonthlyStatsPoint> points = backfill(startMonth, months, dbResult);
         return new MonthlyStatsResponse(TIMEZONE, points);
-    }
-
-    private LocalDateTime toUtcLocalDateTime(YearMonth month) {
-        ZonedDateTime kstStart = month.atDay(1).atStartOfDay(KST);
-        return kstStart.withZoneSameInstant(ZoneId.of("UTC")).toLocalDateTime();
     }
 
     private List<MonthlyStatsPoint> backfill(YearMonth startMonth, int months, Map<String, Long> dbResult) {

@@ -65,8 +65,8 @@ public class UserQueryRepository {
 
         QUser user = QUser.user;
 
-        // Hibernate HQL 파서가 함수 인자 내 `AT TIME ZONE` 을 허용하지 않으므로,
-        // UTC → KST 변환 + YYYY-MM 포맷을 묶은 커스텀 함수(to_char_kst_month)를 사용한다.
+        // 모든 도메인 시각이 KST 로 저장되므로(별도 타임존 변환 불필요),
+        // YYYY-MM 포맷팅만 수행하는 커스텀 HQL 함수(to_char_kst_month)를 사용한다.
         // 함수 등록: global.persistence.PostgresKstFunctionContributor
         StringExpression monthExpr = Expressions.stringTemplate(
             "function('to_char_kst_month', {0})", user.createdDate);

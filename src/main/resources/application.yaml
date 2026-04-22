@@ -23,7 +23,7 @@ spring:
         format_sql: true
         show_sql: true
         jdbc:
-          time_zone: UTC
+          time_zone: Asia/Seoul
     open-in-view: false
   mail:
     host: smtp.gmail.com
