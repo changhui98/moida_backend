@@ -19,6 +19,11 @@ public class ContentTagRepositoryImpl implements ContentTagRepository {
     }
 
     @Override
+    public List<ContentTag> saveAll(Iterable<ContentTag> contentTags) {
+        return contentTagJpaRepository.saveAll(contentTags);
+    }
+
+    @Override
     public List<ContentTag> findAllByContent(Content content) {
         return contentTagJpaRepository.findAllByContent(content);
     }

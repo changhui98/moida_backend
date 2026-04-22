@@ -17,6 +17,7 @@ import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.entity.UserRole;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,17 +32,35 @@ public class CommentService {
 
     /**
      * 게시글의 댓글 목록을 커서 기반 페이지네이션으로 조회한다.
-     * 각 최상위 댓글에 대댓글 목록을 함께 반환한다.
+     *
+     * <p>N+1 방지 전략</p>
+     * <ul>
+     *   <li>최상위 댓글 조회 시 author 를 fetchJoin 하여 nickname 접근으로 인한 LAZY 로딩 제거.</li>
+     *   <li>대댓글은 최상위 댓글 ID 목록으로 <b>단 한 번</b> 배치 조회한 뒤 parentId 로 그룹핑.</li>
+     * </ul>
+     *
+     * <p>hasNext 판정 전략</p>
+     * <ul>
+     *   <li>size 만큼 딱 떨어지는 마지막 페이지 오판정을 피하기 위해 <code>size + 1</code> 을
+     *       요청한 뒤 초과분을 trim 한다.</li>
+     * </ul>
      */
     @Transactional(readOnly = true)
     public CommentListResponse getComments(Long contentId, Long cursorId, int size) {
         getActiveContent(contentId);
 
-        List<Comment> topComments = commentRepository.findTopCommentsByContentId(contentId, cursorId, size);
+        List<Comment> fetched = commentRepository.findTopCommentsByContentId(contentId, cursorId, size + 1);
+
+        boolean hasNext = fetched.size() > size;
+        List<Comment> topComments = hasNext ? fetched.subList(0, size) : fetched;
+
+        List<Long> parentIds = topComments.stream().map(Comment::getId).toList();
+        Map<Long, List<Comment>> repliesByParent = commentRepository.findRepliesGroupedByParentIds(parentIds);
 
         List<CommentResponse> commentResponses = topComments.stream()
             .map(comment -> {
-                List<CommentResponse> replies = commentRepository.findRepliesByParentId(comment.getId())
+                List<CommentResponse> replies = repliesByParent
+                    .getOrDefault(comment.getId(), List.of())
                     .stream()
                     .map(CommentResponse::from)
                     .toList();
@@ -49,11 +68,11 @@ public class CommentService {
             })
             .toList();
 
-        return CommentListResponse.of(commentResponses, size);
+        return CommentListResponse.of(commentResponses, hasNext);
     }
 
     /**
-     * 댓글을 작성한다. 게시글의 commentCount를 증가시킨다.
+     * 댓글을 작성한다. 게시글의 commentCount 를 원자적으로 증가시킨다.
      */
     @Transactional
     public CommentResponse createComment(Long contentId, CommentCreateRequest req, CustomUser customUser) {
@@ -61,14 +80,14 @@ public class CommentService {
         User author = getUser(customUser);
 
         Comment comment = commentRepository.save(Comment.of(content, author, req.body()));
-        content.incrementCommentCount();
+        contentRepository.incrementCommentCount(contentId);
 
         return CommentResponse.from(comment);
     }
 
     /**
-     * 대댓글을 작성한다. 부모 댓글이 이미 대댓글이면 예외를 발생시킨다.
-     * 대댓글 작성도 게시글의 commentCount를 증가시킨다.
+     * 대댓글을 작성한다. 부모 댓글이 이미 대댓글이면 예외를 발생시킨다. (1 depth 제한)
+     * 대댓글 작성도 게시글의 commentCount 를 원자적으로 증가시킨다.
      */
     @Transactional
     public CommentResponse createReply(Long contentId, Long parentCommentId, CommentCreateRequest req, CustomUser customUser) {
@@ -82,13 +101,12 @@ public class CommentService {
             throw new AppException(CommentErrorCode.COMMENT_ALREADY_DELETED);
         }
 
-        // 대댓글에는 답글을 달 수 없다 (1 depth 제한)
         if (parentComment.isReply()) {
             throw new AppException(CommentErrorCode.COMMENT_REPLY_NOT_ALLOWED);
         }
 
         Comment reply = commentRepository.save(Comment.ofReply(content, parentComment, author, req.body()));
-        content.incrementCommentCount();
+        contentRepository.incrementCommentCount(contentId);
 
         return CommentResponse.from(reply);
     }
@@ -110,24 +128,30 @@ public class CommentService {
 
     /**
      * 댓글을 소프트 삭제한다. 본인 또는 관리자만 삭제 가능하다.
-     * 게시글의 commentCount를 감소시킨다.
+     * 게시글의 commentCount 를 원자적으로 감소시킨다.
      */
     @Transactional
     public void deleteComment(Long contentId, Long commentId, CustomUser customUser) {
-        Content content = getActiveContent(contentId);
+        getActiveContent(contentId);
 
         Comment comment = getActiveComment(commentId);
         validateCommentOwnerOrAdmin(comment, customUser);
 
-        // AuditingEntity의 deleteBy 활용: 소프트 삭제 패턴 준수
         User user = getUser(customUser);
         comment.deleteBy(user);
-        content.decrementCommentCount();
+        contentRepository.decrementCommentCount(contentId);
     }
 
+    /**
+     * 활성 게시글을 조회한다. 존재하지 않거나 <b>소프트 삭제된</b> 게시글 은 모두 404 처리한다.
+     */
     private Content getActiveContent(Long contentId) {
-        return contentRepository.findById(contentId)
+        Content content = contentRepository.findById(contentId)
             .orElseThrow(() -> new AppException(ContentErrorCode.CONTENT_NOT_FOUND));
+        if (content.isDeleted()) {
+            throw new AppException(ContentErrorCode.CONTENT_NOT_FOUND);
+        }
+        return content;
     }
 
     private Comment getActiveComment(Long commentId) {

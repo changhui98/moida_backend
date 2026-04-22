@@ -83,4 +83,29 @@ public class ContentRepositoryImpl implements ContentRepository {
 
         return contentQueryRepository.countMonthlyCreations(windowStart);
     }
+
+    @Override
+    public int incrementLikeCount(Long id) {
+        return contentJpaRepository.incrementLikeCount(id);
+    }
+
+    @Override
+    public int decrementLikeCount(Long id) {
+        return contentJpaRepository.decrementLikeCount(id);
+    }
+
+    @Override
+    public Integer findLikeCountById(Long id) {
+        return contentJpaRepository.findLikeCountById(id);
+    }
+
+    @Override
+    public int incrementCommentCount(Long id) {
+        return contentJpaRepository.incrementCommentCount(id);
+    }
+
+    @Override
+    public int decrementCommentCount(Long id) {
+        return contentJpaRepository.decrementCommentCount(id);
+    }
 }

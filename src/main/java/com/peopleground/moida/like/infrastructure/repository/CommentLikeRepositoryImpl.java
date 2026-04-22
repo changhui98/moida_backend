@@ -32,4 +32,9 @@ public class CommentLikeRepositoryImpl implements CommentLikeRepository {
     public void delete(CommentLike commentLike) {
         commentLikeJpaRepository.delete(commentLike);
     }
+
+    @Override
+    public int insertIfNotExists(Long commentId, UUID userId) {
+        return commentLikeJpaRepository.insertIfNotExists(commentId, userId);
+    }
 }

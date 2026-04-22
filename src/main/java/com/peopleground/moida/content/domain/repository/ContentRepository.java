@@ -32,4 +32,29 @@ public interface ContentRepository {
     List<Content> findAllByIds(List<Long> ids);
 
     Map<String, Long> countMonthlyCreations(LocalDateTime windowStart);
+
+    /**
+     * likeCount 를 원자적으로 1 증가시킨다. (DB 레벨 Lost Update 방지용)
+     */
+    int incrementLikeCount(Long id);
+
+    /**
+     * likeCount 를 원자적으로 1 감소시킨다. (0 미만 방지)
+     */
+    int decrementLikeCount(Long id);
+
+    /**
+     * 원자 UPDATE 직후 최신 likeCount 만 가볍게 재조회한다. 존재하지 않으면 null 반환.
+     */
+    Integer findLikeCountById(Long id);
+
+    /**
+     * commentCount 원자적 1 증가 (댓글 작성 시 Lost Update 방지).
+     */
+    int incrementCommentCount(Long id);
+
+    /**
+     * commentCount 원자적 1 감소 (0 미만 방지).
+     */
+    int decrementCommentCount(Long id);
 }

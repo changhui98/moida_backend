@@ -8,6 +8,8 @@ public interface ContentTagRepository {
 
     ContentTag save(ContentTag contentTag);
 
+    List<ContentTag> saveAll(Iterable<ContentTag> contentTags);
+
     List<ContentTag> findAllByContent(Content content);
 
     void deleteAllByContent(Content content);

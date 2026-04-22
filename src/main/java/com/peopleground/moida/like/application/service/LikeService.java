@@ -8,7 +8,6 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.exception.AppException;
-import com.peopleground.moida.like.domain.entity.CommentLike;
 import com.peopleground.moida.like.domain.entity.ContentLike;
 import com.peopleground.moida.like.domain.repository.CommentLikeRepository;
 import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
@@ -35,9 +34,14 @@ public class LikeService {
 
     /**
      * 게시글 좋아요 토글.
-     * 이미 좋아요가 있으면 취소, 없으면 추가한다.
-     * Content.likeCount 비정규화 필드를 함께 갱신한다.
-     * 좋아요 변경 시 캐시를 무효화한다.
+     *
+     * <p>동시성 전략</p>
+     * <ul>
+     *   <li>좋아요 추가: <code>INSERT ... ON CONFLICT DO NOTHING</code> 으로 UNIQUE 경합을
+     *       예외 없이 처리한다. 실제 삽입 행이 1 인 경우에만 likeCount 를 원자 UPDATE 로 증가시킨다.</li>
+     *   <li>좋아요 취소: DELETE 후 원자 UPDATE 로 감소. 0 미만으로는 내려가지 않는다.</li>
+     *   <li>다중 사용자 동시 좋아요에서도 likeCount 의 Lost Update 를 방지한다.</li>
+     * </ul>
      */
     @CacheEvict(value = "contentLikeCount", key = "#contentId")
     @Transactional
@@ -50,22 +54,20 @@ public class LikeService {
         Optional<ContentLike> existingLike = contentLikeRepository.findByContentIdAndUserId(contentId, user.getId());
 
         if (existingLike.isPresent()) {
-            // 좋아요 취소
             contentLikeRepository.delete(existingLike.get());
-            content.decrementLikeCount();
-            return LikeToggleResponse.unliked(content.getLikeCount());
-        } else {
-            // 좋아요 추가
-            contentLikeRepository.save(ContentLike.of(content, user));
-            content.incrementLikeCount();
-            return LikeToggleResponse.liked(content.getLikeCount());
+            contentRepository.decrementLikeCount(contentId);
+            return LikeToggleResponse.unliked(currentContentLikeCount(contentId));
         }
+
+        int inserted = contentLikeRepository.insertIfNotExists(content.getId(), user.getId());
+        if (inserted == 1) {
+            contentRepository.incrementLikeCount(contentId);
+        }
+        return LikeToggleResponse.liked(currentContentLikeCount(contentId));
     }
 
     /**
-     * 댓글 좋아요 토글.
-     * 이미 좋아요가 있으면 취소, 없으면 추가한다.
-     * Comment.likeCount 비정규화 필드를 함께 갱신한다.
+     * 댓글 좋아요 토글. 전략은 게시글 토글과 동일하다. (ON CONFLICT DO NOTHING + 원자 UPDATE)
      */
     @CacheEvict(value = "commentLikeCount", key = "#commentId")
     @Transactional
@@ -79,19 +81,20 @@ public class LikeService {
 
         User user = getUser(customUser);
 
-        Optional<CommentLike> existingLike = commentLikeRepository.findByCommentIdAndUserId(commentId, user.getId());
+        boolean alreadyLiked = commentLikeRepository.existsByCommentIdAndUserId(commentId, user.getId());
 
-        if (existingLike.isPresent()) {
-            // 좋아요 취소
-            commentLikeRepository.delete(existingLike.get());
-            comment.decrementLikeCount();
-            return LikeToggleResponse.unliked(comment.getLikeCount());
-        } else {
-            // 좋아요 추가
-            commentLikeRepository.save(CommentLike.of(comment, user));
-            comment.incrementLikeCount();
-            return LikeToggleResponse.liked(comment.getLikeCount());
+        if (alreadyLiked) {
+            commentLikeRepository.findByCommentIdAndUserId(commentId, user.getId())
+                .ifPresent(commentLikeRepository::delete);
+            commentRepository.decrementLikeCount(commentId);
+            return LikeToggleResponse.unliked(currentCommentLikeCount(commentId));
         }
+
+        int inserted = commentLikeRepository.insertIfNotExists(commentId, user.getId());
+        if (inserted == 1) {
+            commentRepository.incrementLikeCount(commentId);
+        }
+        return LikeToggleResponse.liked(currentCommentLikeCount(commentId));
     }
 
     /**
@@ -117,5 +120,15 @@ public class LikeService {
     private User getUser(CustomUser customUser) {
         return userRepository.findByUsername(customUser.getUsername())
             .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+    }
+
+    private int currentContentLikeCount(Long contentId) {
+        Integer value = contentRepository.findLikeCountById(contentId);
+        return value != null ? value : 0;
+    }
+
+    private int currentCommentLikeCount(Long commentId) {
+        Integer value = commentRepository.findLikeCountById(commentId);
+        return value != null ? value : 0;
     }
 }

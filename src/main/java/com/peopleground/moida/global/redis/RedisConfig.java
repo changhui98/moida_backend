@@ -7,12 +7,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -22,31 +23,26 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 /**
  * Redis 캐시 설정.
  *
- * <p>캐시별 TTL 전략 (Cache Stampede 방지를 위해 각 TTL에 랜덤 지터 적용)</p>
+ * <p>캐시별 기본 TTL 전략 (Cache Stampede 방지를 위해 각 entry 의 put 시점에 지터 적용)</p>
  * <ul>
- *   <li>popularTags: 10분 + 랜덤 지터(0~60초)</li>
- *   <li>tagAutocomplete: 30분 + 랜덤 지터(0~120초)</li>
- *   <li>contentList: 3분 + 랜덤 지터(0~30초)</li>
- *   <li>contentLikeCount: 1시간 + 랜덤 지터(0~300초)</li>
- *   <li>commentLikeCount: 1시간 + 랜덤 지터(0~300초)</li>
+ *   <li>popularTags: 10분 ± 지터(0~60초)</li>
+ *   <li>tagAutocomplete: 30분 ± 지터(0~120초)</li>
+ *   <li>contentList: 3분 ± 지터(0~30초)</li>
+ *   <li>contentLikeCount: 1시간 ± 지터(0~300초)</li>
+ *   <li>commentLikeCount: 1시간 ± 지터(0~300초)</li>
  * </ul>
  *
- * <p>Redis 장애 시 Fallback 처리는 각 Service 레이어에서 try-catch로 처리한다.</p>
+ * <p>지터 구현 상세: {@link RedisCacheWriter.TtlFunction} 을 사용해 entry 가 put 되는
+ * <b>매 시점</b>마다 {@link ThreadLocalRandom} 기반으로 TTL 을 재계산한다. 빈 생성 시점에
+ * 단 한 번 {@code nextInt()} 가 호출되면 모든 엔트리가 동일한 TTL 을 공유해 Stampede 방지
+ * 효과가 사라진다는 기존 버그를 해결한다.</p>
  *
- * <p>직렬화: Spring Data Redis의 RedisSerializer.json() 팩토리 메서드를 통해 ObjectMapper 기반
- * JSON 직렬화기를 생성한다. JavaTimeModule 및 ActivateDefaultTyping으로 LocalDateTime 포함 다형성 타입 지원.</p>
+ * <p>Redis 장애 시 Fallback 처리는 각 Service 레이어에서 try-catch 로 처리한다.</p>
  */
 @Configuration
 @EnableCaching
 public class RedisConfig {
 
-    private static final Random JITTER_RANDOM = new Random();
-
-    /**
-     * LocalDateTime 등 Java 8+ 시간 타입 직렬화를 위해 JavaTimeModule을 등록한 ObjectMapper 기반 직렬화기.
-     * 다형성 지원(ActivateDefaultTyping)으로 역직렬화 시 원래 타입 복원을 보장한다.
-     * RedisSerializer.json()은 내부적으로 JdkSerializationRedisSerializer의 대안으로 사용된다.
-     */
     private ObjectMapper buildRedisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
@@ -58,11 +54,18 @@ public class RedisConfig {
         return mapper;
     }
 
-    @SuppressWarnings("unchecked")
     private RedisSerializer<Object> buildJsonSerializer() {
-        // Spring Data Redis에서 ObjectMapper를 받는 RedisSerializer.json() 오버로드가 없으므로
-        // 커스텀 ObjectMapper를 사용하는 MoidaJsonRedisSerializer를 사용한다.
         return new MoidaJsonRedisSerializer(buildRedisObjectMapper());
+    }
+
+    /**
+     * 엔트리가 put 될 때마다 {@code baseSeconds + [0, jitterSeconds)} 범위의 TTL 을 반환한다.
+     * {@link ThreadLocalRandom} 을 사용해 멀티스레드 경합 없이 스레드-안전하게 동작한다.
+     */
+    private RedisCacheWriter.TtlFunction jitteredTtl(long baseSeconds, int jitterSeconds) {
+        return (key, value) -> Duration.ofSeconds(
+            baseSeconds + ThreadLocalRandom.current().nextInt(jitterSeconds)
+        );
     }
 
     @Bean
@@ -93,25 +96,20 @@ public class RedisConfig {
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
-        // 인기 태그 목록: 10분 + 지터(0~60초)
         cacheConfigurations.put("popularTags",
-            defaultConfig.entryTtl(Duration.ofSeconds(600 + JITTER_RANDOM.nextInt(60))));
+            defaultConfig.entryTtl(jitteredTtl(600, 60)));
 
-        // 태그 자동완성: 30분 + 지터(0~120초)
         cacheConfigurations.put("tagAutocomplete",
-            defaultConfig.entryTtl(Duration.ofSeconds(1800 + JITTER_RANDOM.nextInt(120))));
+            defaultConfig.entryTtl(jitteredTtl(1800, 120)));
 
-        // 게시글 목록 1페이지: 3분 + 지터(0~30초)
         cacheConfigurations.put("contentList",
-            defaultConfig.entryTtl(Duration.ofSeconds(180 + JITTER_RANDOM.nextInt(30))));
+            defaultConfig.entryTtl(jitteredTtl(180, 30)));
 
-        // 게시글 좋아요 카운트: 1시간 + 지터(0~300초)
         cacheConfigurations.put("contentLikeCount",
-            defaultConfig.entryTtl(Duration.ofSeconds(3600 + JITTER_RANDOM.nextInt(300))));
+            defaultConfig.entryTtl(jitteredTtl(3600, 300)));
 
-        // 댓글 좋아요 카운트: 1시간 + 지터(0~300초)
         cacheConfigurations.put("commentLikeCount",
-            defaultConfig.entryTtl(Duration.ofSeconds(3600 + JITTER_RANDOM.nextInt(300))));
+            defaultConfig.entryTtl(jitteredTtl(3600, 300)));
 
         return RedisCacheManager.builder(connectionFactory)
             .cacheDefaults(defaultConfig)

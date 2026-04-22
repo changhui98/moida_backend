@@ -7,10 +7,13 @@ import com.peopleground.moida.comment.presentation.dto.response.CommentListRespo
 import com.peopleground.moida.comment.presentation.dto.response.CommentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/contents/{contentId}/comments")
+@Validated
 public class CommentController {
 
     private final CommentService commentService;
@@ -35,7 +39,7 @@ public class CommentController {
     public ResponseEntity<CommentListResponse> getComments(
         @PathVariable Long contentId,
         @RequestParam(required = false) Long cursorId,
-        @RequestParam(defaultValue = "20") int size
+        @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
     ) {
         CommentListResponse res = commentService.getComments(contentId, cursorId, size);
         return ResponseEntity.status(HttpStatus.OK).body(res);
