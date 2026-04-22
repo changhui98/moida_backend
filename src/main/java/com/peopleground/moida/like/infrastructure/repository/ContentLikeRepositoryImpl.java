@@ -2,7 +2,10 @@ package com.peopleground.moida.like.infrastructure.repository;
 
 import com.peopleground.moida.like.domain.entity.ContentLike;
 import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -36,5 +39,13 @@ public class ContentLikeRepositoryImpl implements ContentLikeRepository {
     @Override
     public int insertIfNotExists(Long contentId, UUID userId) {
         return contentLikeJpaRepository.insertIfNotExists(contentId, userId);
+    }
+
+    @Override
+    public Set<Long> findLikedContentIds(UUID userId, Collection<Long> contentIds) {
+        if (userId == null || contentIds == null || contentIds.isEmpty()) {
+            return Set.of();
+        }
+        return new HashSet<>(contentLikeJpaRepository.findLikedContentIds(userId, contentIds));
     }
 }

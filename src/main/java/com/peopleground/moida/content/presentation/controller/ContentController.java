@@ -36,9 +36,10 @@ public class ContentController {
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(required = false) String keyword,
-        @RequestParam(required = false, defaultValue = "TITLE") SearchType searchType
+        @RequestParam(required = false, defaultValue = "TITLE") SearchType searchType,
+        @AuthenticationPrincipal CustomUser user
     ) {
-        PageResponse<ContentResponse> res = contentService.getContents(page, size, keyword, searchType);
+        PageResponse<ContentResponse> res = contentService.getContents(page, size, keyword, searchType, user);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 

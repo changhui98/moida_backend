@@ -1,6 +1,7 @@
 package com.peopleground.moida.tag.presentation.controller;
 
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
+import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.tag.application.service.TagService;
 import com.peopleground.moida.tag.presentation.dto.response.TagResponse;
@@ -10,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,9 +54,10 @@ public class TagController {
     public ResponseEntity<PageResponse<ContentResponse>> getContentsByTagName(
         @PathVariable String name,
         @RequestParam(defaultValue = "0") @Min(0) int page,
-        @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size
+        @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+        @AuthenticationPrincipal CustomUser user
     ) {
-        PageResponse<ContentResponse> res = tagService.getContentsByTagName(name, page, size);
+        PageResponse<ContentResponse> res = tagService.getContentsByTagName(name, page, size, user);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }

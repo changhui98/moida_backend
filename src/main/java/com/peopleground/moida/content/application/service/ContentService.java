@@ -12,13 +12,17 @@ import com.peopleground.moida.content.presentation.dto.response.ContentUpdateRes
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
 import com.peopleground.moida.tag.application.service.TagService;
 import com.peopleground.moida.user.domain.UserErrorCode;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ public class ContentService {
     private final ContentRepository contentRepository;
     private final UserRepository userRepository;
     private final TagService tagService;
+    private final ContentLikeRepository contentLikeRepository;
 
     @CacheEvict(value = "contentList", allEntries = true)
     @Transactional
@@ -49,16 +54,16 @@ public class ContentService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ContentResponse> getContents(int page, int size, String keyword, SearchType searchType) {
+    public PageResponse<ContentResponse> getContents(
+        int page, int size, String keyword, SearchType searchType, CustomUser user
+    ) {
         Pageable pageable = PageRequest.of(page, size);
 
-        if (keyword != null && !keyword.isBlank()) {
-            return PageResponse.from(
-                contentRepository.searchContents(keyword, searchType, pageable).map(ContentResponse::from)
-            );
-        }
+        Page<Content> contents = (keyword != null && !keyword.isBlank())
+            ? contentRepository.searchContents(keyword, searchType, pageable)
+            : contentRepository.findAllContents(pageable);
 
-        return PageResponse.from(contentRepository.findAllContents(pageable).map(ContentResponse::from));
+        return PageResponse.from(toResponsePage(contents, user));
     }
 
     /**
@@ -67,10 +72,8 @@ public class ContentService {
     @Transactional(readOnly = true)
     public PageResponse<ContentResponse> getMyContents(CustomUser customUser, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return PageResponse.from(
-            contentRepository.findAllByUsername(customUser.getUsername(), pageable)
-                .map(ContentResponse::from)
-        );
+        Page<Content> contents = contentRepository.findAllByUsername(customUser.getUsername(), pageable);
+        return PageResponse.from(toResponsePage(contents, customUser));
     }
 
     @CacheEvict(value = "contentList", allEntries = true)
@@ -114,5 +117,27 @@ public class ContentService {
 
         return userRepository.findByUsername(user.getUsername())
             .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+    }
+
+    /**
+     * Page&lt;Content&gt; 를 현재 사용자의 좋아요 여부(likedByMe) 까지 채워진
+     * Page&lt;ContentResponse&gt; 로 변환한다.
+     *
+     * <p>성능 노트</p>
+     * <ul>
+     *   <li>현재 페이지의 모든 contentId 를 한 번에 넘겨 배치 조회 → N+1 방지.</li>
+     *   <li>로그인하지 않았거나 페이지가 비어 있으면 DB 쿼리를 스킵하고 likedByMe=false 로 고정.</li>
+     * </ul>
+     */
+    private Page<ContentResponse> toResponsePage(Page<Content> contents, CustomUser user) {
+        if (contents.isEmpty() || user == null) {
+            return contents.map(ContentResponse::from);
+        }
+
+        List<Long> ids = contents.getContent().stream().map(Content::getId).toList();
+        UUID userId = user.getId();
+        Set<Long> likedIds = contentLikeRepository.findLikedContentIds(userId, ids);
+
+        return contents.map(c -> ContentResponse.from(c, likedIds.contains(c.getId())));
     }
 }
