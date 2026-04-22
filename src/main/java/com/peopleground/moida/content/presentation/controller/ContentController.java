@@ -42,6 +42,19 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    /**
+     * 현재 로그인한 사용자가 작성한 글 목록(최신순, 삭제글 제외) 을 반환한다.
+     */
+    @GetMapping("/me")
+    public ResponseEntity<PageResponse<ContentResponse>> getMyContents(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal CustomUser user
+    ) {
+        PageResponse<ContentResponse> res = contentService.getMyContents(user, page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
     @PostMapping
     public ResponseEntity<ContentCreateResponse> contentCreate(
         @RequestBody ContentCreateRequest req,

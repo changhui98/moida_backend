@@ -49,6 +49,18 @@ public class ContentService {
         return PageResponse.from(contentRepository.findAllContents(pageable).map(ContentResponse::from));
     }
 
+    /**
+     * 현재 로그인한 사용자가 작성한 글 목록을 최신순으로 페이지네이션하여 반환한다.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<ContentResponse> getMyContents(CustomUser customUser, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return PageResponse.from(
+            contentRepository.findAllByUsername(customUser.getUsername(), pageable)
+                .map(ContentResponse::from)
+        );
+    }
+
     @Transactional
     public ContentUpdateResponse updateContent(Long contentId, ContentUpdateRequest req, CustomUser customUser) {
 
