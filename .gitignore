@@ -67,3 +67,4 @@ coverage/
 # ===============================
 .claude/
 CLAUDE.md
+.coderabbit.yaml
