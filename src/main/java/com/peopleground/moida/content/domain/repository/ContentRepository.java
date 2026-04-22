@@ -20,6 +20,8 @@ public interface ContentRepository {
 
     Page<Content> findAllContentsIncludingDeleted(Pageable pageable);
 
+    Page<Content> findAllByUsername(String username, Pageable pageable);
+
     Page<Content> searchContents(String keyword, SearchType searchType, Pageable pageable);
 
     Page<Content> searchContentsIncludingDeleted(String keyword, SearchType searchType, Pageable pageable);

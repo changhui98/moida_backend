@@ -94,6 +94,40 @@ public class ContentQueryRepository {
         return new PageImpl<>(contents, pageable, total != null ? total : 0);
     }
 
+    /**
+     * 특정 username(로그인 ID) 에 해당하는 작성자의 삭제되지 않은 글만 최신순으로 반환한다.
+     * containsIgnoreCase 가 아닌 정확 일치(eq) 를 사용해야 "내 글" 목록이 오염되지 않는다.
+     */
+    public Page<Content> findAllByUsername(String username, Pageable pageable) {
+
+        QContent content = QContent.content;
+        QUser user = QUser.user;
+
+        List<Content> contents = queryFactory
+            .selectFrom(content)
+            .join(content.user, user)
+            .where(
+                user.username.eq(username),
+                content.deletedDate.isNull()
+            )
+            .orderBy(content.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(content.count())
+            .from(content)
+            .join(content.user, user)
+            .where(
+                user.username.eq(username),
+                content.deletedDate.isNull()
+            )
+            .fetchOne();
+
+        return new PageImpl<>(contents, pageable, total != null ? total : 0);
+    }
+
     public Page<Content> searchContents(String keyword, SearchType searchType, Pageable pageable) {
 
         QContent content = QContent.content;

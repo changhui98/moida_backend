@@ -49,6 +49,12 @@ public class ContentRepositoryImpl implements ContentRepository {
     }
 
     @Override
+    public Page<Content> findAllByUsername(String username, Pageable pageable) {
+
+        return contentQueryRepository.findAllByUsername(username, pageable);
+    }
+
+    @Override
     public Page<Content> searchContents(String keyword, SearchType searchType, Pageable pageable) {
 
         return contentQueryRepository.searchContents(keyword, searchType, pageable);
