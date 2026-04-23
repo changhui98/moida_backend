@@ -5,7 +5,8 @@ public record UserUpdateRequest(
     String userEmail,
     String address,
     String currentPassword,
-    String newPassword
+    String newPassword,
+    String profileImageUrl
 ) {
 
 }

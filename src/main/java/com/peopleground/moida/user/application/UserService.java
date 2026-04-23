@@ -87,8 +87,10 @@ public class UserService {
 
         String nickname = req.nickname() != null ? req.nickname() : user.getNickname();
         String userEmail = req.userEmail() != null ? req.userEmail() : user.getUserEmail();
+        String profileImageUrl = req.profileImageUrl() != null ? req.profileImageUrl() : user.getProfileImageUrl();
 
         User updateUser = user.updateUser(nickname, userEmail, address, location, encodedNewPassword);
+        updateUser.updateProfileImageUrl(profileImageUrl);
 
         User saveUser = userRepository.updateProfile(updateUser);
 
