@@ -12,6 +12,7 @@ public record UserDetailResponse(
     String userEmail,
     String address,
     UserRole role,
+    String profileImageUrl,
     LocalDateTime createdAt,
     LocalDateTime modifiedAt
 ) {
@@ -24,6 +25,7 @@ public record UserDetailResponse(
             user.getUserEmail(),
             user.getAddress(),
             user.getRole(),
+            user.getProfileImageUrl(),
             user.getCreatedDate(),
             user.getLastModifiedDate()
         );

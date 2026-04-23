@@ -52,6 +52,13 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private boolean emailVerified = false;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
+    public void updateProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
     public static User of
         (
             String username,
