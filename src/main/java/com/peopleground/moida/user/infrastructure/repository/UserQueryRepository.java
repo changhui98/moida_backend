@@ -7,6 +7,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +92,32 @@ public class UserQueryRepository {
                 t -> t.get(countExpr),
                 (a, b) -> a,
                 LinkedHashMap::new
+            ));
+    }
+
+    /**
+     * 주어진 username 목록에 대한 {username -> nickname} 매핑을 배치로 조회한다.
+     * 게시글 목록 등 다건 응답에서 작성자 닉네임을 N+1 없이 채우기 위한 전용 경로.
+     */
+    public Map<String, String> findNicknamesByUsernames(Collection<String> usernames) {
+
+        if (usernames == null || usernames.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        QUser user = QUser.user;
+
+        List<Tuple> tuples = queryFactory
+            .select(user.username, user.nickname)
+            .from(user)
+            .where(user.username.in(usernames))
+            .fetch();
+
+        return tuples.stream()
+            .collect(Collectors.toMap(
+                t -> t.get(user.username),
+                t -> t.get(user.nickname),
+                (a, b) -> a
             ));
     }
 }

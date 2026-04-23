@@ -8,21 +8,27 @@ public record ContentResponse(
     String title,
     String body,
     String createdBy,
+    String nickname,
     LocalDateTime createdAt,
     int likeCount,
     int commentCount,
     boolean likedByMe
 ) {
     public static ContentResponse from(Content content) {
-        return from(content, false);
+        return from(content, null, false);
     }
 
     public static ContentResponse from(Content content, boolean likedByMe) {
+        return from(content, null, likedByMe);
+    }
+
+    public static ContentResponse from(Content content, String nickname, boolean likedByMe) {
         return new ContentResponse(
             content.getId(),
             content.getTitle(),
             content.getBody(),
             content.getCreatedBy(),
+            nickname,
             content.getCreatedDate(),
             content.getLikeCount(),
             content.getCommentCount(),

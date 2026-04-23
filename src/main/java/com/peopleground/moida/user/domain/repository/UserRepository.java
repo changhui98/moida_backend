@@ -2,6 +2,7 @@ package com.peopleground.moida.user.domain.repository;
 
 import com.peopleground.moida.user.domain.entity.User;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -26,4 +27,6 @@ public interface UserRepository {
     boolean existsByUserEmail(String email);
 
     Map<String, Long> countMonthlySignups(LocalDateTime windowStart);
+
+    Map<String, String> findNicknamesByUsernames(Collection<String> usernames);
 }
