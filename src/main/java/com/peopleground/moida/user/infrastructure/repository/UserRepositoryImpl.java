@@ -3,6 +3,7 @@ package com.peopleground.moida.user.infrastructure.repository;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -68,5 +69,11 @@ public class UserRepositoryImpl implements UserRepository {
     public Map<String, Long> countMonthlySignups(LocalDateTime windowStart) {
 
         return userQueryRepository.countMonthlySignups(windowStart);
+    }
+
+    @Override
+    public Map<String, String> findNicknamesByUsernames(Collection<String> usernames) {
+
+        return userQueryRepository.findNicknamesByUsernames(usernames);
     }
 }
