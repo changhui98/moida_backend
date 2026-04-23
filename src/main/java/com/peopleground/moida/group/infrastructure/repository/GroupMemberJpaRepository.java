@@ -1,0 +1,19 @@
+package com.peopleground.moida.group.infrastructure.repository;
+
+import com.peopleground.moida.group.domain.entity.GroupMember;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface GroupMemberJpaRepository extends JpaRepository<GroupMember, Long> {
+
+    @Query("SELECT gm FROM p_group_member gm JOIN gm.user u WHERE gm.group.id = :groupId AND u.username = :username")
+    Optional<GroupMember> findByGroupIdAndUsername(@Param("groupId") Long groupId, @Param("username") String username);
+
+    List<GroupMember> findByGroupId(Long groupId);
+
+    @Query("SELECT COUNT(gm) FROM p_group_member gm JOIN gm.user u WHERE gm.group.id = :groupId AND u.username = :username")
+    long countByGroupIdAndUsername(@Param("groupId") Long groupId, @Param("username") String username);
+}

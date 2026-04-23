@@ -1,0 +1,40 @@
+package com.peopleground.moida.group.infrastructure.repository;
+
+import com.peopleground.moida.group.domain.entity.GroupMember;
+import com.peopleground.moida.group.domain.repository.GroupMemberRepository;
+import java.util.List;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+@Repository
+@RequiredArgsConstructor
+public class GroupMemberRepositoryImpl implements GroupMemberRepository {
+
+    private final GroupMemberJpaRepository groupMemberJpaRepository;
+
+    @Override
+    public GroupMember save(GroupMember groupMember) {
+        return groupMemberJpaRepository.save(groupMember);
+    }
+
+    @Override
+    public Optional<GroupMember> findByGroupIdAndUsername(Long groupId, String username) {
+        return groupMemberJpaRepository.findByGroupIdAndUsername(groupId, username);
+    }
+
+    @Override
+    public List<GroupMember> findByGroupId(Long groupId) {
+        return groupMemberJpaRepository.findByGroupId(groupId);
+    }
+
+    @Override
+    public boolean existsByGroupIdAndUsername(Long groupId, String username) {
+        return groupMemberJpaRepository.countByGroupIdAndUsername(groupId, username) > 0;
+    }
+
+    @Override
+    public void delete(GroupMember groupMember) {
+        groupMemberJpaRepository.delete(groupMember);
+    }
+}
