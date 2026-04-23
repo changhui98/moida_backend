@@ -56,6 +56,17 @@ public class ContentController {
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 
+    @GetMapping("/users/{username}")
+    public ResponseEntity<PageResponse<ContentResponse>> getContentsByUsername(
+        @PathVariable String username,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal CustomUser user
+    ) {
+        PageResponse<ContentResponse> res = contentService.getContentsByUsername(user, username, page, size);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
     @PostMapping
     public ResponseEntity<ContentCreateResponse> contentCreate(
         @RequestBody ContentCreateRequest req,
