@@ -40,6 +40,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public UserDetailResponse getProfileByUsername(String username) {
+        User user = getActiveUserByUsername(username);
+        return UserDetailResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
     public PageResponse<UserResponseMarker> getUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
 
@@ -98,7 +104,11 @@ public class UserService {
     }
 
     private User getUser(CustomUser customUser) {
-        User user = userRepository.findByUsername(customUser.getUsername()).orElseThrow(
+        return getActiveUserByUsername(customUser.getUsername());
+    }
+
+    private User getActiveUserByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(
             () -> new AppException(UserErrorCode.USER_NOT_FOUND)
         );
 

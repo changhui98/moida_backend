@@ -74,6 +74,20 @@ public class ContentService {
         return PageResponse.from(contentResponseAssembler.toResponsePage(contents, customUser));
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<ContentResponse> getContentsByUsername(CustomUser customUser, String username, int page, int size) {
+        User author = userRepository.findByUsername(username)
+            .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
+
+        if (author.isDeleted()) {
+            throw new AppException(UserErrorCode.USER_NOT_FOUND);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Content> contents = contentRepository.findAllByUsername(username, pageable);
+        return PageResponse.from(contentResponseAssembler.toResponsePage(contents, customUser));
+    }
+
     @CacheEvict(value = "contentList", allEntries = true)
     @Transactional
     public ContentUpdateResponse updateContent(Long contentId, ContentUpdateRequest req, CustomUser customUser) {
