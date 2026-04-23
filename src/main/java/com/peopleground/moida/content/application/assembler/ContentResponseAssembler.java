@@ -4,8 +4,12 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
+import com.peopleground.moida.tag.domain.entity.ContentTag;
+import com.peopleground.moida.tag.domain.repository.ContentTagRepository;
 import com.peopleground.moida.user.domain.repository.UserRepository;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +34,7 @@ public class ContentResponseAssembler {
 
     private final ContentLikeRepository contentLikeRepository;
     private final UserRepository userRepository;
+    private final ContentTagRepository contentTagRepository;
 
     /**
      * {@link Page}&lt;{@link Content}&gt; 를 {@link ContentResponse} 페이지로 변환한다.
@@ -57,11 +62,13 @@ public class ContentResponseAssembler {
             : userRepository.findNicknamesByUsernames(usernames);
 
         Set<Long> likedIds = resolveLikedIds(list, user);
+        Map<Long, List<String>> tagsByContentId = resolveTagsByContentId(list);
 
         return contents.map(c -> ContentResponse.from(
             c,
             nicknames.get(c.getCreatedBy()),
-            likedIds.contains(c.getId())
+            likedIds.contains(c.getId()),
+            tagsByContentId.getOrDefault(c.getId(), List.of())
         ));
     }
 
@@ -73,5 +80,32 @@ public class ContentResponseAssembler {
         UUID userId = user.getId();
         List<Long> ids = contents.stream().map(Content::getId).toList();
         return contentLikeRepository.findLikedContentIds(userId, ids);
+    }
+
+    private Map<Long, List<String>> resolveTagsByContentId(List<Content> contents) {
+
+        if (contents.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Long> contentIds = contents.stream().map(Content::getId).toList();
+        List<ContentTag> mappings = contentTagRepository.findAllFetchTagByContentIdIn(contentIds);
+        if (mappings.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Long, List<String>> result = new LinkedHashMap<>();
+        for (ContentTag mapping : mappings) {
+            Long contentId = mapping.getContent().getId();
+            String tagName = mapping.getTag().getName();
+            result.computeIfAbsent(contentId, ignored -> new ArrayList<>()).add(tagName);
+        }
+
+        // 불변 리스트로 정규화
+        for (Map.Entry<Long, List<String>> entry : result.entrySet()) {
+            entry.setValue(List.copyOf(entry.getValue()));
+        }
+
+        return result;
     }
 }

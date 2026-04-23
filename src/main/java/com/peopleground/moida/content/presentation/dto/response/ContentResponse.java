@@ -2,6 +2,7 @@ package com.peopleground.moida.content.presentation.dto.response;
 
 import com.peopleground.moida.content.domain.entity.Content;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ContentResponse(
     Long id,
@@ -12,17 +13,22 @@ public record ContentResponse(
     LocalDateTime createdAt,
     int likeCount,
     int commentCount,
-    boolean likedByMe
+    boolean likedByMe,
+    List<String> tags
 ) {
     public static ContentResponse from(Content content) {
-        return from(content, null, false);
+        return from(content, null, false, List.of());
     }
 
     public static ContentResponse from(Content content, boolean likedByMe) {
-        return from(content, null, likedByMe);
+        return from(content, null, likedByMe, List.of());
     }
 
     public static ContentResponse from(Content content, String nickname, boolean likedByMe) {
+        return from(content, nickname, likedByMe, List.of());
+    }
+
+    public static ContentResponse from(Content content, String nickname, boolean likedByMe, List<String> tags) {
         return new ContentResponse(
             content.getId(),
             content.getTitle(),
@@ -32,7 +38,8 @@ public record ContentResponse(
             content.getCreatedDate(),
             content.getLikeCount(),
             content.getCommentCount(),
-            likedByMe
+            likedByMe,
+            tags == null ? List.of() : List.copyOf(tags)
         );
     }
 }
