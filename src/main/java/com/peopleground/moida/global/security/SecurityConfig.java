@@ -59,6 +59,9 @@ public class SecurityConfig {
                     .requestMatchers("/api/v1/tags/**").permitAll()
                     // 댓글 목록 조회 공개 API (비로그인 사용자도 댓글 조회 가능)
                     .requestMatchers(HttpMethod.GET, "/api/v1/contents/*/comments").permitAll()
+                    // 이미지 조회 공개 API (비로그인 사용자도 이미지 조회 가능)
+                    .requestMatchers(HttpMethod.GET, "/api/v1/images").permitAll()
+                    .requestMatchers("/images/**").permitAll()
                     .anyRequest().authenticated())
 
             .exceptionHandling(e ->
