@@ -1,6 +1,7 @@
 package com.peopleground.moida.group.infrastructure.repository;
 
 import com.peopleground.moida.group.domain.entity.Group;
+import com.peopleground.moida.group.domain.entity.GroupCategory;
 import com.peopleground.moida.group.domain.repository.GroupRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,11 @@ public class GroupRepositoryImpl implements GroupRepository {
     @Override
     public Page<Group> findAll(Pageable pageable) {
         return groupQueryRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category) {
+        return groupQueryRepository.findAll(pageable, keyword, category);
     }
 
     @Override

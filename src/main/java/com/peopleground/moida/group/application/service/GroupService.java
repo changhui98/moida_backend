@@ -5,6 +5,7 @@ import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.global.exception.AppException;
 import com.peopleground.moida.group.domain.GroupErrorCode;
 import com.peopleground.moida.group.domain.entity.Group;
+import com.peopleground.moida.group.domain.entity.GroupCategory;
 import com.peopleground.moida.group.domain.entity.GroupMember;
 import com.peopleground.moida.group.domain.entity.GroupMemberRole;
 import com.peopleground.moida.group.domain.repository.GroupMemberRepository;
@@ -57,9 +58,9 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<GroupResponse> getGroups(int page, int size) {
+    public PageResponse<GroupResponse> getGroups(int page, int size, String keyword, GroupCategory category) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Group> groups = groupRepository.findAll(pageable);
+        Page<Group> groups = groupRepository.findAll(pageable, keyword, category);
         return PageResponse.from(groups.map(GroupResponse::from));
     }
 
@@ -92,6 +93,12 @@ public class GroupService {
     public void deleteGroup(Long groupId, CustomUser customUser) {
         Group group = findGroup(groupId);
         validateLeader(group, customUser.getUsername());
+
+        // 소속 멤버 전체 하드 삭제
+        List<GroupMember> members = groupMemberRepository.findByGroupId(groupId);
+        for (GroupMember member : members) {
+            groupMemberRepository.delete(member);
+        }
 
         User user = getUser(customUser.getUsername());
         group.delete(user);

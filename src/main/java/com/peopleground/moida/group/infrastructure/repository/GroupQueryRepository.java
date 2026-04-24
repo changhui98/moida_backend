@@ -1,9 +1,11 @@
 package com.peopleground.moida.group.infrastructure.repository;
 
 import com.peopleground.moida.group.domain.entity.Group;
+import com.peopleground.moida.group.domain.entity.GroupCategory;
 import com.peopleground.moida.group.domain.entity.QGroup;
 import com.peopleground.moida.group.domain.entity.QGroupMember;
 import com.peopleground.moida.user.domain.entity.QUser;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +56,36 @@ public class GroupQueryRepository {
         return new PageImpl<>(groups, pageable, total != null ? total : 0);
     }
 
+    public Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category) {
+        QGroup group = QGroup.group;
+
+        BooleanBuilder builder = new BooleanBuilder();
+        builder.and(group.deletedDate.isNull());
+
+        if (keyword != null && !keyword.isBlank()) {
+            builder.and(group.name.containsIgnoreCase(keyword));
+        }
+        if (category != null) {
+            builder.and(group.category.eq(category));
+        }
+
+        List<Group> groups = queryFactory
+            .selectFrom(group)
+            .where(builder)
+            .orderBy(group.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(group.count())
+            .from(group)
+            .where(builder)
+            .fetchOne();
+
+        return new PageImpl<>(groups, pageable, total != null ? total : 0);
+    }
+
     public Page<Group> findByMemberUsername(String username, Pageable pageable) {
         QGroup group = QGroup.group;
         QGroupMember groupMember = QGroupMember.groupMember;
@@ -65,7 +97,8 @@ public class GroupQueryRepository {
             .join(groupMember.user, user)
             .where(
                 user.username.eq(username),
-                group.deletedDate.isNull()
+                group.deletedDate.isNull(),
+                groupMember.deletedDate.isNull()
             )
             .orderBy(group.createdDate.desc())
             .offset(pageable.getOffset())
@@ -79,7 +112,8 @@ public class GroupQueryRepository {
             .join(groupMember.user, user)
             .where(
                 user.username.eq(username),
-                group.deletedDate.isNull()
+                group.deletedDate.isNull(),
+                groupMember.deletedDate.isNull()
             )
             .fetchOne();
 
