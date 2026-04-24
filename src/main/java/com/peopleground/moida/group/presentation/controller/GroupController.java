@@ -3,6 +3,7 @@ package com.peopleground.moida.group.presentation.controller;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.group.application.service.GroupService;
+import com.peopleground.moida.group.domain.entity.GroupCategory;
 import com.peopleground.moida.group.presentation.dto.request.GroupCreateRequest;
 import com.peopleground.moida.group.presentation.dto.request.GroupUpdateRequest;
 import com.peopleground.moida.group.presentation.dto.response.GroupDetailResponse;
@@ -43,9 +44,11 @@ public class GroupController {
     @GetMapping
     public ResponseEntity<PageResponse<GroupResponse>> getGroups(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) GroupCategory category
     ) {
-        PageResponse<GroupResponse> response = groupService.getGroups(page, size);
+        PageResponse<GroupResponse> response = groupService.getGroups(page, size, keyword, category);
         return ResponseEntity.ok(response);
     }
 
