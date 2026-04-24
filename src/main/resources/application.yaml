@@ -71,7 +71,7 @@ logging:
 ## jwt
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 3600000
+  expiration: 2592000000  # 30일 (ms)
 
 ## Google Maps API
 google:
