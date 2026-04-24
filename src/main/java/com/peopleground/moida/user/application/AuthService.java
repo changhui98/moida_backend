@@ -1,6 +1,8 @@
 package com.peopleground.moida.user.application;
 
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.global.redis.TokenBlacklistService;
+import com.peopleground.moida.global.security.jwt.JwtTokenProvider;
 import com.peopleground.moida.user.domain.UserErrorCode;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
@@ -24,6 +26,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final GeocodingClient geocodingClient;
     private final EmailVerificationService emailVerificationService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
     @Transactional
@@ -69,6 +73,19 @@ public class AuthService {
 
     public boolean isUsernameAvailable(String username) {
         return !userRepository.existsByUsername(username);
+    }
+
+    /**
+     * 로그아웃: Access Token을 Redis 블랙리스트에 등록한다.
+     *
+     * @param token Authorization 헤더에서 추출한 Access Token (Bearer prefix 제외)
+     */
+    public void signOut(String token) {
+        if (token == null || token.isBlank()) {
+            return;
+        }
+        long remaining = jwtTokenProvider.getRemainingExpiration(token);
+        tokenBlacklistService.addToBlacklist(token, remaining);
     }
 
     private void validateDuplicateUsername(String username) {

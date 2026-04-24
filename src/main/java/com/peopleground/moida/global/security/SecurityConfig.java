@@ -3,6 +3,7 @@ package com.peopleground.moida.global.security;
 import com.peopleground.moida.global.configure.CorsConfig;
 import com.peopleground.moida.global.exception.JsonAccessDeniedHandler;
 import com.peopleground.moida.global.exception.JsonAuthenticationEntryPoint;
+import com.peopleground.moida.global.redis.TokenBlacklistService;
 import com.peopleground.moida.global.security.jwt.JwtAuthenticationFilter;
 import com.peopleground.moida.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final ObjectMapper objectMapper;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg)
@@ -54,7 +56,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth ->
-                auth.requestMatchers("/api/v1/auth/**").permitAll()
+                auth
+                    // 로그아웃은 인증 필요 (토큰을 블랙리스트에 등록해야 하므로)
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-out").authenticated()
+                    .requestMatchers("/api/v1/auth/**").permitAll()
                     // 태그 관련 공개 API (비로그인 사용자도 태그 검색 가능)
                     .requestMatchers("/api/v1/tags/**").permitAll()
                     // 댓글 목록 조회 공개 API (비로그인 사용자도 댓글 조회 가능)
@@ -68,7 +73,7 @@ public class SecurityConfig {
                 e.accessDeniedHandler(new JsonAccessDeniedHandler())
                     .authenticationEntryPoint(new JsonAuthenticationEntryPoint()))
 
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), AuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, tokenBlacklistService), AuthenticationFilter.class)
 
             .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

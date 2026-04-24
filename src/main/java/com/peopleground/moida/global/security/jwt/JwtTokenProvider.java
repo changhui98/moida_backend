@@ -111,4 +111,12 @@ public class JwtTokenProvider {
     public String getRoles(String token) {
         return parseClaims(token).get("roles", String.class);
     }
+
+    /**
+     * 토큰의 남은 만료 시간을 밀리초 단위로 반환
+     */
+    public long getRemainingExpiration(String token) {
+        Date expiration = parseClaims(token).getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 }
