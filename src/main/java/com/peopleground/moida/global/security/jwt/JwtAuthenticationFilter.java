@@ -1,6 +1,7 @@
 package com.peopleground.moida.global.security.jwt;
 
 import com.peopleground.moida.global.configure.CustomUser;
+import com.peopleground.moida.global.redis.TokenBlacklistService;
 import com.peopleground.moida.user.domain.entity.UserRole;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -34,7 +36,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = jwtTokenProvider.resolveToken(request);
 
-        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)
+            && !tokenBlacklistService.isBlacklisted(token)) {
             UUID id = jwtTokenProvider.getUserId(token);
             String username = jwtTokenProvider.getUsername(token);
             String role = jwtTokenProvider.getRoles(token);

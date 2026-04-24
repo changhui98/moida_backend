@@ -1,5 +1,6 @@
 package com.peopleground.moida.user.presentation.controller;
 
+import com.peopleground.moida.global.security.jwt.JwtTokenProvider;
 import com.peopleground.moida.user.application.AuthService;
 import com.peopleground.moida.user.application.EmailVerificationService;
 import com.peopleground.moida.user.presentation.dto.request.EmailResendRequest;
@@ -7,6 +8,7 @@ import com.peopleground.moida.user.presentation.dto.request.EmailVerifyRequest;
 import com.peopleground.moida.user.presentation.dto.request.SendVerificationRequest;
 import com.peopleground.moida.user.presentation.dto.request.UserCreateRequest;
 import com.peopleground.moida.user.presentation.dto.response.UserCreateResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailVerificationService emailVerificationService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/check-username")
     public ResponseEntity<Map<String, Boolean>> checkUsername(
@@ -69,6 +72,13 @@ public class AuthController {
         emailVerificationService.resendCode(request.email());
 
         return ResponseEntity.ok(Map.of("message", "인증코드가 재발송되었습니다."));
+    }
+
+    @PostMapping("/sign-out")
+    public ResponseEntity<Void> signOut(HttpServletRequest request) {
+        String token = jwtTokenProvider.resolveToken(request);
+        authService.signOut(token);
+        return ResponseEntity.noContent().build();
     }
 
 }
