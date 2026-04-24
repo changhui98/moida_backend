@@ -46,6 +46,9 @@ public class Group extends AuditingEntity {
     @Column(nullable = false)
     private int currentMemberCount = 0;
 
+    @Column(nullable = true)
+    private String imageUrl;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id", nullable = false)
     private User leader;
@@ -86,6 +89,10 @@ public class Group extends AuditingEntity {
 
     public boolean isFull() {
         return this.currentMemberCount >= this.maxMemberCount;
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void delete(User user) {

@@ -13,7 +13,8 @@ public record GroupResponse(
     int currentMemberCount,
     String leaderNickname,
     String leaderUsername,
-    LocalDateTime createdDate
+    LocalDateTime createdDate,
+    String imageUrl
 ) {
 
     public static GroupResponse from(Group group) {
@@ -26,7 +27,8 @@ public record GroupResponse(
             group.getCurrentMemberCount(),
             group.getLeader().getNickname(),
             group.getLeader().getUsername(),
-            group.getCreatedDate()
+            group.getCreatedDate(),
+            group.getImageUrl()
         );
     }
 }

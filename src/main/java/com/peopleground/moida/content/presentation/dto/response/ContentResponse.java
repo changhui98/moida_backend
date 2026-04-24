@@ -14,21 +14,34 @@ public record ContentResponse(
     int likeCount,
     int commentCount,
     boolean likedByMe,
-    List<String> tags
+    List<String> tags,
+    List<String> imageUrls
 ) {
     public static ContentResponse from(Content content) {
-        return from(content, null, false, List.of());
+        return from(content, null, false, List.of(), List.of());
     }
 
     public static ContentResponse from(Content content, boolean likedByMe) {
-        return from(content, null, likedByMe, List.of());
+        return from(content, null, likedByMe, List.of(), List.of());
     }
 
     public static ContentResponse from(Content content, String nickname, boolean likedByMe) {
-        return from(content, nickname, likedByMe, List.of());
+        return from(content, nickname, likedByMe, List.of(), List.of());
     }
 
+    // 기존 4-파라미터 오버로드 유지 (ContentResponseAssembler가 이 시그니처 호출 중)
     public static ContentResponse from(Content content, String nickname, boolean likedByMe, List<String> tags) {
+        return from(content, nickname, likedByMe, tags, List.of());
+    }
+
+    // 새 5-파라미터 오버로드 추가
+    public static ContentResponse from(
+        Content content,
+        String nickname,
+        boolean likedByMe,
+        List<String> tags,
+        List<String> imageUrls
+    ) {
         return new ContentResponse(
             content.getId(),
             content.getTitle(),
@@ -39,7 +52,8 @@ public record ContentResponse(
             content.getLikeCount(),
             content.getCommentCount(),
             likedByMe,
-            tags == null ? List.of() : List.copyOf(tags)
+            tags == null ? List.of() : List.copyOf(tags),
+            imageUrls == null ? List.of() : List.copyOf(imageUrls)
         );
     }
 }

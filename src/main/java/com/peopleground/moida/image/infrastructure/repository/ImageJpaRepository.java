@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ImageJpaRepository extends JpaRepository<Image, Long> {
 
     List<Image> findByTargetTypeAndTargetIdOrderBySortOrderAsc(ImageTargetType targetType, String targetId);
+
+    List<Image> findByTargetTypeAndTargetIdInOrderBySortOrderAsc(ImageTargetType targetType, List<String> targetIds);
 }

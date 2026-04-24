@@ -3,7 +3,11 @@ package com.peopleground.moida.image.infrastructure.repository;
 import com.peopleground.moida.image.domain.entity.Image;
 import com.peopleground.moida.image.domain.entity.ImageTargetType;
 import com.peopleground.moida.image.domain.repository.ImageRepository;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,6 +31,22 @@ public class ImageRepositoryImpl implements ImageRepository {
     @Override
     public List<Image> findByTarget(ImageTargetType targetType, String targetId) {
         return imageJpaRepository.findByTargetTypeAndTargetIdOrderBySortOrderAsc(targetType, targetId);
+    }
+
+    @Override
+    public Map<String, List<String>> findUrlsByTargetIds(ImageTargetType targetType, List<String> targetIds) {
+        if (targetIds == null || targetIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<Image> images = imageJpaRepository
+            .findByTargetTypeAndTargetIdInOrderBySortOrderAsc(targetType, targetIds);
+
+        Map<String, List<String>> result = new LinkedHashMap<>();
+        for (Image image : images) {
+            result.computeIfAbsent(image.getTargetId(), ignored -> new ArrayList<>())
+                  .add(image.getFileUrl());
+        }
+        return result;
     }
 
     @Override

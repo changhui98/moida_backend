@@ -3,6 +3,8 @@ package com.peopleground.moida.content.application.assembler;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
+import com.peopleground.moida.image.domain.entity.ImageTargetType;
+import com.peopleground.moida.image.domain.repository.ImageRepository;
 import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
 import com.peopleground.moida.tag.domain.entity.ContentTag;
 import com.peopleground.moida.tag.domain.repository.ContentTagRepository;
@@ -35,6 +37,7 @@ public class ContentResponseAssembler {
     private final ContentLikeRepository contentLikeRepository;
     private final UserRepository userRepository;
     private final ContentTagRepository contentTagRepository;
+    private final ImageRepository imageRepository;
 
     /**
      * {@link Page}&lt;{@link Content}&gt; 를 {@link ContentResponse} 페이지로 변환한다.
@@ -63,12 +66,14 @@ public class ContentResponseAssembler {
 
         Set<Long> likedIds = resolveLikedIds(list, user);
         Map<Long, List<String>> tagsByContentId = resolveTagsByContentId(list);
+        Map<String, List<String>> imagesByContentId = resolveImagesByContentId(list);
 
         return contents.map(c -> ContentResponse.from(
             c,
             nicknames.get(c.getCreatedBy()),
             likedIds.contains(c.getId()),
-            tagsByContentId.getOrDefault(c.getId(), List.of())
+            tagsByContentId.getOrDefault(c.getId(), List.of()),
+            imagesByContentId.getOrDefault(String.valueOf(c.getId()), List.of())
         ));
     }
 
@@ -80,6 +85,16 @@ public class ContentResponseAssembler {
         UUID userId = user.getId();
         List<Long> ids = contents.stream().map(Content::getId).toList();
         return contentLikeRepository.findLikedContentIds(userId, ids);
+    }
+
+    private Map<String, List<String>> resolveImagesByContentId(List<Content> contents) {
+        if (contents.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        List<String> targetIds = contents.stream()
+            .map(c -> String.valueOf(c.getId()))
+            .toList();
+        return imageRepository.findUrlsByTargetIds(ImageTargetType.CONTENT, targetIds);
     }
 
     private Map<Long, List<String>> resolveTagsByContentId(List<Content> contents) {

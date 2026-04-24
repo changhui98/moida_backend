@@ -67,6 +67,10 @@ public class AuthService {
         }
     }
 
+    public boolean isUsernameAvailable(String username) {
+        return !userRepository.existsByUsername(username);
+    }
+
     private void validateDuplicateUsername(String username) {
 
         if (userRepository.existsByUsername(username)) {

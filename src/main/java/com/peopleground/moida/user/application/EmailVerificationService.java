@@ -75,6 +75,10 @@ public class EmailVerificationService {
     @Transactional
     public void sendVerificationBeforeSignUp(String email) {
 
+        if (userRepository.existsByUserEmail(email)) {
+            throw new AppException(UserErrorCode.DUPLICATE_EMAIL);
+        }
+
         Optional<EmailVerificationTemp> existing = emailVerificationTempRepository.findByEmail(email);
 
         if (existing.isPresent()) {
