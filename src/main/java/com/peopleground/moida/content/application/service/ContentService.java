@@ -40,7 +40,7 @@ public class ContentService {
     public ContentCreateResponse contentCreate(ContentCreateRequest req, CustomUser user) {
 
         User findUser = getUser(user);
-        Content content = contentRepository.save(Content.of(req.title(), req.body(), findUser));
+        Content content = contentRepository.save(Content.of(req.body(), findUser));
 
         // 태그가 있는 경우 태그 연동 처리
         List<String> tags = req.tags();
@@ -93,7 +93,7 @@ public class ContentService {
     public ContentUpdateResponse updateContent(Long contentId, ContentUpdateRequest req, CustomUser customUser) {
 
         Content content = getContentByOwner(contentId, customUser);
-        content.update(req.title(), req.body());
+        content.update(req.body());
 
         // tags 필드가 null이 아닌 경우 태그 교체 (null이면 태그 변경 없음)
         if (req.tags() != null) {

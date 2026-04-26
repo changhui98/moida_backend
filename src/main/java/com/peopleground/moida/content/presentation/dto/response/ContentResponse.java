@@ -6,7 +6,6 @@ import java.util.List;
 
 public record ContentResponse(
     Long id,
-    String title,
     String body,
     String createdBy,
     String nickname,
@@ -44,7 +43,6 @@ public record ContentResponse(
     ) {
         return new ContentResponse(
             content.getId(),
-            content.getTitle(),
             content.getBody(),
             content.getCreatedBy(),
             nickname,

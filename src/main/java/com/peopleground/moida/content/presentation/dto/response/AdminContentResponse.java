@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public record AdminContentResponse(
     Long id,
-    String title,
     String body,
     UUID userId,
     String createdBy,
@@ -19,7 +18,6 @@ public record AdminContentResponse(
     public static AdminContentResponse from(Content content) {
         return new AdminContentResponse(
             content.getId(),
-            content.getTitle(),
             content.getBody(),
             content.getUser().getId(),
             content.getCreatedBy(),

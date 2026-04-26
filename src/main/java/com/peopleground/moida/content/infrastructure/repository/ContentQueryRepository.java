@@ -261,7 +261,7 @@ public class ContentQueryRepository {
         if (searchType == SearchType.USERNAME) {
             builder.and(user.username.containsIgnoreCase(keyword));
         } else {
-            builder.and(content.title.containsIgnoreCase(keyword));
+            builder.and(content.body.containsIgnoreCase(keyword));
         }
 
         return builder;

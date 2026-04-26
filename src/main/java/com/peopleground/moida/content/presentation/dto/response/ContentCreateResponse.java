@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 public record ContentCreateResponse(
     Long id,
-    String title,
     String body,
     String createdBy,
     LocalDateTime createdAt,
@@ -16,7 +15,6 @@ public record ContentCreateResponse(
 
         return new ContentCreateResponse(
             content.getId(),
-            content.getTitle(),
             content.getBody(),
             content.getUser().getUsername(),
             content.getCreatedDate(),

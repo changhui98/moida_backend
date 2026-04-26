@@ -10,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,10 +24,6 @@ public class Content extends AuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
-    @Size(max = 20)
-    private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
@@ -47,12 +42,10 @@ public class Content extends AuditingEntity {
     private long viewCount = 0;
 
     public static Content of(
-        String title,
         String body,
         User user
     ) {
         Content content = new Content();
-        content.title = title;
         content.body = body;
         content.user = user;
         content.likeCount = 0;
@@ -61,8 +54,7 @@ public class Content extends AuditingEntity {
         return content;
     }
 
-    public void update(String title, String body) {
-        this.title = title;
+    public void update(String body) {
         this.body = body;
     }
 
