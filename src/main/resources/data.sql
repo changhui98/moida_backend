@@ -61,9 +61,8 @@ VALUES
 -- =====================================================
 
 -- admin (aaaaaaaa-0000-0000-0000-000000000001) 게시글 25개
-INSERT INTO p_content (title, body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
+INSERT INTO p_content (body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
 SELECT
-    '관리자 테스트 게시글 ' || s || '번',
     '이것은 관리자가 작성한 ' || s || '번째 테스트 게시글입니다.',
     'aaaaaaaa-0000-0000-0000-000000000001'::uuid,
     0,
@@ -76,9 +75,8 @@ SELECT
 FROM generate_series(1, 25) s;
 
 -- user1 (aaaaaaaa-0000-0000-0000-000000000002) 게시글 25개
-INSERT INTO p_content (title, body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
+INSERT INTO p_content (body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
 SELECT
-    'user1 테스트 게시글 ' || s || '번',
     '이것은 user1이 작성한 ' || s || '번째 테스트 게시글입니다.',
     'aaaaaaaa-0000-0000-0000-000000000002'::uuid,
     0,
@@ -91,9 +89,8 @@ SELECT
 FROM generate_series(1, 25) s;
 
 -- user2 (aaaaaaaa-0000-0000-0000-000000000003) 게시글 25개
-INSERT INTO p_content (title, body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
+INSERT INTO p_content (body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
 SELECT
-    'user2 테스트 게시글 ' || s || '번',
     '이것은 user2가 작성한 ' || s || '번째 테스트 게시글입니다.',
     'aaaaaaaa-0000-0000-0000-000000000003'::uuid,
     0,
@@ -106,9 +103,8 @@ SELECT
 FROM generate_series(1, 25) s;
 
 -- user3 (aaaaaaaa-0000-0000-0000-000000000004) 게시글 25개
-INSERT INTO p_content (title, body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
+INSERT INTO p_content (body, user_id, like_count, comment_count, view_count, created_by, last_modified_by, created_date, last_modified_date)
 SELECT
-    'user3 테스트 게시글 ' || s || '번',
     '이것은 user3이 작성한 ' || s || '번째 테스트 게시글입니다.',
     'aaaaaaaa-0000-0000-0000-000000000004'::uuid,
     0,

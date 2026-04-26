@@ -56,7 +56,7 @@ public class AdminService {
             throw new AppException(ContentErrorCode.CONTENT_ALREADY_DELETED);
         }
 
-        content.update(req.title(), req.body());
+        content.update(req.body());
         return AdminContentResponse.from(content);
     }
 
