@@ -81,11 +81,11 @@ public class LikeService {
 
         User user = getUser(customUser);
 
-        boolean alreadyLiked = commentLikeRepository.existsByCommentIdAndUserId(commentId, user.getId());
+        Optional<com.peopleground.moida.like.domain.entity.CommentLike> existingLike =
+            commentLikeRepository.findByCommentIdAndUserId(commentId, user.getId());
 
-        if (alreadyLiked) {
-            commentLikeRepository.findByCommentIdAndUserId(commentId, user.getId())
-                .ifPresent(commentLikeRepository::delete);
+        if (existingLike.isPresent()) {
+            commentLikeRepository.delete(existingLike.get());
             commentRepository.decrementLikeCount(commentId);
             return LikeToggleResponse.unliked(currentCommentLikeCount(commentId));
         }
