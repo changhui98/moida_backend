@@ -94,11 +94,8 @@ public class GroupService {
         Group group = findGroup(groupId);
         validateLeader(group, customUser.getUsername());
 
-        // 소속 멤버 전체 하드 삭제
-        List<GroupMember> members = groupMemberRepository.findByGroupId(groupId);
-        for (GroupMember member : members) {
-            groupMemberRepository.delete(member);
-        }
+        // 소속 멤버 전체 배치 삭제 (개별 삭제 루프 제거)
+        groupMemberRepository.deleteAllByGroupId(groupId);
 
         User user = getUser(customUser.getUsername());
         group.delete(user);
