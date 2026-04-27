@@ -1,5 +1,8 @@
 package com.peopleground.moida.global.redis;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +87,37 @@ public class ViewCountService {
             redisTemplate.delete(processingKey);
             return members != null ? members : Set.of();
         }, Set::of);
+    }
+
+    /**
+     * 여러 게시글의 조회수를 Redis MGET(multiGet)으로 한 번에 조회한다.
+     *
+     * <p>개별 {@code getViewCount} 루프 대비 N번의 Redis 왕복을 1번으로 줄여
+     * 배치 동기화 성능을 개선한다. Redis 장애 시 {@link RedisFallbackUtil}을 통해
+     * 조용히 실패 처리하며, 값이 없는 ID는 0L로 채워 반환한다.</p>
+     *
+     * @param contentIds 조회할 게시글 ID 목록
+     * @return contentId → viewCount 맵 (순서 보장 불필요)
+     */
+    public Map<Long, Long> multiGetViewCounts(List<Long> contentIds) {
+        return redisFallbackUtil.executeWithFallback(() -> {
+            List<String> keys = contentIds.stream()
+                .map(id -> VIEW_COUNT_KEY_PREFIX + id)
+                .toList();
+            List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+            Map<Long, Long> result = new HashMap<>();
+            for (int i = 0; i < contentIds.size(); i++) {
+                Object v = (values != null) ? values.get(i) : null;
+                result.put(contentIds.get(i), v != null ? Long.parseLong(v.toString()) : 0L);
+            }
+            return result;
+        }, () -> {
+            Map<Long, Long> fallback = new HashMap<>();
+            for (Long id : contentIds) {
+                fallback.put(id, 0L);
+            }
+            return fallback;
+        });
     }
 
     /**
