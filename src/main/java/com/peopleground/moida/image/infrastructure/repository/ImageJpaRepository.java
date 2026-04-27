@@ -10,4 +10,6 @@ public interface ImageJpaRepository extends JpaRepository<Image, Long> {
     List<Image> findByTargetTypeAndTargetIdOrderBySortOrderAsc(ImageTargetType targetType, String targetId);
 
     List<Image> findByTargetTypeAndTargetIdInOrderBySortOrderAsc(ImageTargetType targetType, List<String> targetIds);
+
+    int countByTargetTypeAndTargetId(ImageTargetType targetType, String targetId);
 }

@@ -50,6 +50,11 @@ public class ImageRepositoryImpl implements ImageRepository {
     }
 
     @Override
+    public int countByTargetTypeAndTargetId(ImageTargetType targetType, String targetId) {
+        return imageJpaRepository.countByTargetTypeAndTargetId(targetType, targetId);
+    }
+
+    @Override
     public void deleteById(Long id) {
         imageJpaRepository.deleteById(id);
     }

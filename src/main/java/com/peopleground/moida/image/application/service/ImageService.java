@@ -48,7 +48,7 @@ public class ImageService {
 
         String fileUrl = imageStorage.store(file, storedFilename);
 
-        int sortOrder = imageRepository.findByTarget(targetType, targetId).size();
+        int sortOrder = imageRepository.countByTargetTypeAndTargetId(targetType, targetId);
 
         Image image = Image.of(
             targetType,

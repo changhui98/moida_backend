@@ -16,5 +16,7 @@ public interface ImageRepository {
 
     Map<String, List<String>> findUrlsByTargetIds(ImageTargetType targetType, List<String> targetIds);
 
+    int countByTargetTypeAndTargetId(ImageTargetType targetType, String targetId);
+
     void deleteById(Long id);
 }
