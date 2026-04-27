@@ -36,26 +36,6 @@ public class GroupQueryRepository {
         );
     }
 
-    public Page<Group> findAll(Pageable pageable) {
-        QGroup group = QGroup.group;
-
-        List<Group> groups = queryFactory
-            .selectFrom(group)
-            .where(group.deletedDate.isNull())
-            .orderBy(group.createdDate.desc())
-            .offset(pageable.getOffset())
-            .limit(pageable.getPageSize())
-            .fetch();
-
-        Long total = queryFactory
-            .select(group.count())
-            .from(group)
-            .where(group.deletedDate.isNull())
-            .fetchOne();
-
-        return new PageImpl<>(groups, pageable, total != null ? total : 0);
-    }
-
     public Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category) {
         QGroup group = QGroup.group;
 

@@ -30,7 +30,7 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepository {
 
     @Override
     public boolean existsByGroupIdAndUsername(Long groupId, String username) {
-        return groupMemberJpaRepository.countByGroupIdAndUsername(groupId, username) > 0;
+        return groupMemberJpaRepository.existsByGroupIdAndUsername(groupId, username);
     }
 
     @Override
