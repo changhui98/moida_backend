@@ -37,4 +37,9 @@ public class GroupMemberRepositoryImpl implements GroupMemberRepository {
     public void delete(GroupMember groupMember) {
         groupMemberJpaRepository.delete(groupMember);
     }
+
+    @Override
+    public void deleteAllByGroupId(Long groupId) {
+        groupMemberJpaRepository.deleteAllByGroupId(groupId);
+    }
 }

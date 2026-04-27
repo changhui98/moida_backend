@@ -15,4 +15,6 @@ public interface GroupMemberRepository {
     boolean existsByGroupIdAndUsername(Long groupId, String username);
 
     void delete(GroupMember groupMember);
+
+    void deleteAllByGroupId(Long groupId);
 }
