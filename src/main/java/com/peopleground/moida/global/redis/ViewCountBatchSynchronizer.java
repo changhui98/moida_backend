@@ -3,6 +3,7 @@ package com.peopleground.moida.global.redis;
 import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +48,10 @@ public class ViewCountBatchSynchronizer {
 
         List<Content> contents = contentRepository.findAllByIds(contentIds);
 
+        Map<Long, Long> viewCountMap = viewCountService.multiGetViewCounts(contentIds);
+
         for (Content content : contents) {
-            Long redisCount = viewCountService.getViewCount(content.getId());
+            Long redisCount = viewCountMap.getOrDefault(content.getId(), 0L);
             content.syncViewCount(redisCount);
         }
 
