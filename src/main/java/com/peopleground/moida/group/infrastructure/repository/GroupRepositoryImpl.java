@@ -27,11 +27,6 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
-    public Page<Group> findAll(Pageable pageable) {
-        return groupQueryRepository.findAll(pageable);
-    }
-
-    @Override
     public Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category) {
         return groupQueryRepository.findAll(pageable, keyword, category);
     }

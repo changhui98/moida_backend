@@ -56,8 +56,8 @@ public class AuthService {
             point
         );
 
-        User saveUser = userRepository.save(user);
         user.verifyEmail();
+        User saveUser = userRepository.save(user);
 
         emailVerificationService.deletePreVerification(saveUser.getUserEmail());
 

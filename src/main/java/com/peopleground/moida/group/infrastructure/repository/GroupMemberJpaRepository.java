@@ -14,8 +14,8 @@ public interface GroupMemberJpaRepository extends JpaRepository<GroupMember, Lon
 
     List<GroupMember> findByGroupId(Long groupId);
 
-    @Query("SELECT COUNT(gm) FROM p_group_member gm JOIN gm.user u WHERE gm.group.id = :groupId AND u.username = :username")
-    long countByGroupIdAndUsername(@Param("groupId") Long groupId, @Param("username") String username);
+    @Query("SELECT CASE WHEN COUNT(gm) > 0 THEN true ELSE false END FROM p_group_member gm JOIN gm.user u WHERE gm.group.id = :groupId AND u.username = :username")
+    boolean existsByGroupIdAndUsername(@Param("groupId") Long groupId, @Param("username") String username);
 
     @org.springframework.data.jpa.repository.Modifying
     @Query("DELETE FROM p_group_member gm WHERE gm.group.id = :groupId")

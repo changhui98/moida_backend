@@ -12,8 +12,6 @@ public interface GroupRepository {
 
     Optional<Group> findById(Long id);
 
-    Page<Group> findAll(Pageable pageable);
-
     Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category);
 
     Page<Group> findByMemberUsername(String username, Pageable pageable);
