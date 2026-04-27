@@ -1,5 +1,6 @@
 package com.peopleground.moida.user.infrastructure.repository;
 
+import com.peopleground.moida.user.domain.entity.OAuthProvider;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -75,5 +76,11 @@ public class UserRepositoryImpl implements UserRepository {
     public Map<String, String> findNicknamesByUsernames(Collection<String> usernames) {
 
         return userQueryRepository.findNicknamesByUsernames(usernames);
+    }
+
+    @Override
+    public Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId) {
+
+        return userJpaRepository.findByProviderAndProviderId(provider, providerId);
     }
 }

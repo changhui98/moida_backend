@@ -1,5 +1,6 @@
 package com.peopleground.moida.user.domain.repository;
 
+import com.peopleground.moida.user.domain.entity.OAuthProvider;
 import com.peopleground.moida.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -29,4 +30,6 @@ public interface UserRepository {
     Map<String, Long> countMonthlySignups(LocalDateTime windowStart);
 
     Map<String, String> findNicknamesByUsernames(Collection<String> usernames);
+
+    Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId);
 }

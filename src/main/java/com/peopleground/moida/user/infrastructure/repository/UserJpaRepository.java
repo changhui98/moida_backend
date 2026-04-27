@@ -1,5 +1,6 @@
 package com.peopleground.moida.user.infrastructure.repository;
 
+import com.peopleground.moida.user.domain.entity.OAuthProvider;
 import com.peopleground.moida.user.domain.entity.User;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,4 +15,6 @@ public interface UserJpaRepository extends JpaRepository<User, UUID> {
     Optional<User> findByUserEmail(String email);
 
     boolean existsByUserEmail(String email);
+
+    Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId);
 }
