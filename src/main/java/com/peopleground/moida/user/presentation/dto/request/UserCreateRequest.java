@@ -21,7 +21,7 @@ public record UserCreateRequest(
     String password,
 
     @NotBlank(message = "닉네임은 필수입니다.")
-    @Size(min = 4, max = 10, message = "닉네임은 최소4글자 최대10글자까지 가능합니다.")
+    @Size(min = 2, max = 10, message = "닉네임은 최소2글자 최대10글자까지 가능합니다.")
     @Pattern(
         regexp = "^[가-힣a-zA-Z0-9]+$",
         message = "닉네임은 한글, 영어, 숫자만 사용할 수 있습니다."

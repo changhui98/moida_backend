@@ -60,7 +60,13 @@ public class UserService {
         User user = getUser(customUser);
 
         String encodedNewPassword = user.getPassword();
-        if (req.newPassword() != null && !req.newPassword().isBlank()) {
+        boolean wantsPasswordChange = req.newPassword() != null && !req.newPassword().isBlank();
+
+        if (wantsPasswordChange) {
+            // 소셜 가입 사용자는 비밀번호가 없으므로 비밀번호 변경 불가
+            if (user.getPassword() == null) {
+                throw new AppException(UserErrorCode.SOCIAL_USER_CANNOT_CHANGE_PASSWORD);
+            }
 
             if (req.currentPassword() == null || req.currentPassword().isBlank()) {
                 throw new AppException(UserErrorCode.PASSWORD_REQUIRED);
@@ -72,10 +78,12 @@ public class UserService {
             encodedNewPassword = passwordEncoder.encode(req.newPassword());
         }
 
-        String address = req.address() != null ? req.address() : user.getAddress();
+        // 빈 문자열("")은 null과 동일하게 처리하여 기존 값을 유지한다.
+        boolean hasAddress = req.address() != null && !req.address().isBlank();
+        String address = hasAddress ? req.address() : user.getAddress();
         Point location;
 
-        if (req.address() != null) {
+        if (hasAddress) {
             GeoPoint geo = geocodingClient.convert(req.address());
             location = geometryFactory.createPoint(
                 new Coordinate(geo.longitude(), geo.latitude())
@@ -85,16 +93,19 @@ public class UserService {
             location = user.getLocation();
         }
 
-        String nickname = req.nickname() != null ? req.nickname() : user.getNickname();
-        String userEmail = req.userEmail() != null ? req.userEmail() : user.getUserEmail();
-        String profileImageUrl = req.profileImageUrl() != null ? req.profileImageUrl() : user.getProfileImageUrl();
+        String nickname = (req.nickname() != null && !req.nickname().isBlank())
+            ? req.nickname() : user.getNickname();
+        String userEmail = (req.userEmail() != null && !req.userEmail().isBlank())
+            ? req.userEmail() : user.getUserEmail();
+        String profileImageUrl = req.profileImageUrl() != null
+            ? req.profileImageUrl() : user.getProfileImageUrl();
 
         User updateUser = user.updateUser(nickname, userEmail, address, location, encodedNewPassword);
         updateUser.updateProfileImageUrl(profileImageUrl);
 
         User saveUser = userRepository.updateProfile(updateUser);
 
-        return  UserDetailResponse.from(saveUser);
+        return UserDetailResponse.from(saveUser);
     }
 
     @Transactional
