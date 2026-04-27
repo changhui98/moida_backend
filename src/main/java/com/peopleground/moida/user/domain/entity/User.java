@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 
 @Getter
@@ -30,7 +31,7 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
+    @Column
     private String password;
 
     @Column(nullable = false)
@@ -55,6 +56,13 @@ public class User extends BaseEntity {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OAuthProvider provider = OAuthProvider.LOCAL;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
     public void updateProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
@@ -76,6 +84,38 @@ public class User extends BaseEntity {
         user.role = UserRole.USER;
         user.address = address;
         user.location = location;
+        user.provider = OAuthProvider.LOCAL;
+        return user;
+    }
+
+    /**
+     * 소셜 로그인 사용자 생성 팩토리 메서드
+     * password 는 null, location 은 빈 좌표로 초기화한다.
+     */
+    public static User ofSocial(
+        OAuthProvider provider,
+        String providerId,
+        String nickname,
+        String userEmail,
+        String profileImageUrl,
+        String address
+    ) {
+        User user = new User();
+        user.username = provider.name().toLowerCase() + "_" + providerId;
+        user.password = null;
+        user.nickname = nickname;
+        user.userEmail = userEmail;
+        user.role = UserRole.USER;
+        user.address = address;
+        user.provider = provider;
+        user.providerId = providerId;
+        user.profileImageUrl = profileImageUrl;
+        // 소셜 가입 시 주소가 미정인 경우 임시 좌표(0,0) 사용 — 주소 등록 후 업데이트 필요
+        user.location = new GeometryFactory().createPoint(
+            new org.locationtech.jts.geom.Coordinate(0, 0)
+        );
+        user.location.setSRID(4326);
+        user.emailVerified = true;
         return user;
     }
 

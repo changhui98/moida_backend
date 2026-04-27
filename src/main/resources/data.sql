@@ -13,7 +13,7 @@ CREATE INDEX IF NOT EXISTS idx_content_body_fts
 -- 유저 4명 INSERT
 -- 비밀번호: Test1234! (BCrypt)
 -- =====================================================
-INSERT INTO p_user (id, username, password, nickname, user_email, role, address, location, email_verified, created_date, last_modified_date)
+INSERT INTO p_user (id, username, password, nickname, user_email, role, address, location, email_verified, provider, created_date, last_modified_date)
 VALUES
     ('aaaaaaaa-0000-0000-0000-000000000001',
      'admin',
@@ -24,6 +24,7 @@ VALUES
      '서울 강남구 삼성동',
      ST_SetSRID(ST_MakePoint(127.0590, 37.5140), 4326)::geography,
      true,
+     'LOCAL',
      NOW(),
      NOW()),
 
@@ -36,6 +37,7 @@ VALUES
      '서울 마포구 합정동',
      ST_SetSRID(ST_MakePoint(126.9134, 37.5498), 4326)::geography,
      true,
+     'LOCAL',
      NOW(),
      NOW()),
 
@@ -48,6 +50,7 @@ VALUES
      '서울 송파구 잠실동',
      ST_SetSRID(ST_MakePoint(127.1003, 37.5131), 4326)::geography,
      true,
+     'LOCAL',
      NOW(),
      NOW()),
 
@@ -60,6 +63,7 @@ VALUES
      '서울 종로구 세종로',
      ST_SetSRID(ST_MakePoint(126.9769, 37.5759), 4326)::geography,
      true,
+     'LOCAL',
      NOW(),
      NOW());
 

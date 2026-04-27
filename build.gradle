@@ -76,11 +76,30 @@ dependencies {
 
 }
 
+def loadEnv() {
+    def envFile = file('.env')
+    def envVars = [:]
+    if (envFile.exists()) {
+        envFile.eachLine { line ->
+            line = line.trim()
+            if (line && !line.startsWith('#') && line.contains('=')) {
+                def idx = line.indexOf('=')
+                def key = line.substring(0, idx).trim()
+                def value = line.substring(idx + 1).trim()
+                envVars[key] = value
+            }
+        }
+    }
+    return envVars
+}
+
 bootRun {
 	jvmArgs = ['-Duser.timezone=UTC']
+	environment loadEnv()
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 	jvmArgs = ['-Duser.timezone=UTC']
+	environment loadEnv()
 }
