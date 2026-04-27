@@ -10,6 +10,7 @@ public record AdminUserResponse(
     String nickname,
     String userEmail,
     String address,
+    String profileImageUrl,
     boolean isDeleted,
     LocalDateTime createdDate,
     LocalDateTime modifiedDate
@@ -22,6 +23,7 @@ public record AdminUserResponse(
             user.getNickname(),
             user.getUserEmail(),
             user.getAddress(),
+            user.getProfileImageUrl(),
             user.isDeleted(),
             user.getCreatedDate(),
             user.getLastModifiedDate()
