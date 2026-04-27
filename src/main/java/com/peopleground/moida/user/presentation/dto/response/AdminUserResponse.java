@@ -1,5 +1,6 @@
 package com.peopleground.moida.user.presentation.dto.response;
 
+import com.peopleground.moida.user.domain.entity.OAuthProvider;
 import com.peopleground.moida.user.domain.entity.User;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -11,6 +12,7 @@ public record AdminUserResponse(
     String userEmail,
     String address,
     String profileImageUrl,
+    OAuthProvider provider,
     boolean isDeleted,
     LocalDateTime createdDate,
     LocalDateTime modifiedDate
@@ -24,6 +26,7 @@ public record AdminUserResponse(
             user.getUserEmail(),
             user.getAddress(),
             user.getProfileImageUrl(),
+            user.getProvider(),
             user.isDeleted(),
             user.getCreatedDate(),
             user.getLastModifiedDate()

@@ -1,5 +1,6 @@
 package com.peopleground.moida.user.presentation.dto.response;
 
+import com.peopleground.moida.user.domain.entity.OAuthProvider;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.entity.UserRole;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ public record AdminUserDetailResponse(
     String nickname,
     String userEmail,
     UserRole role,
+    OAuthProvider provider,
     String address,
     LocalDateTime createAt,
     LocalDateTime modifiedAt,
@@ -24,6 +26,7 @@ public record AdminUserDetailResponse(
             user.getNickname(),
             user.getUserEmail(),
             user.getRole(),
+            user.getProvider(),
             user.getAddress(),
             user.getCreatedDate(),
             user.getLastModifiedDate(),
