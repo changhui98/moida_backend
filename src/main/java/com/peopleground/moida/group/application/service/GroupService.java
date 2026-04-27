@@ -52,7 +52,6 @@ public class GroupService {
         GroupMember leaderMember = GroupMember.of(saved, leader, GroupMemberRole.LEADER);
         groupMemberRepository.save(leaderMember);
         saved.incrementMemberCount();
-        groupRepository.save(saved);
 
         return GroupResponse.from(saved);
     }
@@ -86,7 +85,7 @@ public class GroupService {
             request.maxMemberCount()
         );
 
-        return GroupResponse.from(groupRepository.save(group));
+        return GroupResponse.from(group);
     }
 
     @Transactional
@@ -99,7 +98,6 @@ public class GroupService {
 
         User user = getUser(customUser.getUsername());
         group.delete(user);
-        groupRepository.save(group);
     }
 
     @Transactional
@@ -119,7 +117,6 @@ public class GroupService {
         groupMemberRepository.save(member);
 
         group.incrementMemberCount();
-        groupRepository.save(group);
     }
 
     @Transactional
@@ -135,7 +132,6 @@ public class GroupService {
         Group group = findGroup(groupId);
         groupMemberRepository.delete(member);
         group.decrementMemberCount();
-        groupRepository.save(group);
     }
 
     @Transactional
@@ -149,7 +145,6 @@ public class GroupService {
 
         groupMemberRepository.delete(targetMember);
         group.decrementMemberCount();
-        groupRepository.save(group);
     }
 
     @Transactional(readOnly = true)
