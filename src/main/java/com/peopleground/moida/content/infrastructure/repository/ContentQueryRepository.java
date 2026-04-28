@@ -159,6 +159,7 @@ public class ContentQueryRepository {
     /**
      * 특정 username(로그인 ID) 에 해당하는 작성자의 삭제되지 않은 글만 최신순으로 반환한다.
      * containsIgnoreCase 가 아닌 정확 일치(eq) 를 사용해야 "내 글" 목록이 오염되지 않는다.
+     * groupId가 null인 게시글(모임 게시글 제외)만 반환한다.
      */
     public Page<Content> findAllByUsername(String username, Pageable pageable) {
 
@@ -170,7 +171,8 @@ public class ContentQueryRepository {
             .join(content.user, user)
             .where(
                 user.username.eq(username),
-                content.deletedDate.isNull()
+                content.deletedDate.isNull(),
+                content.groupId.isNull()
             )
             .orderBy(content.createdDate.desc())
             .offset(pageable.getOffset())
@@ -183,7 +185,8 @@ public class ContentQueryRepository {
             .join(content.user, user)
             .where(
                 user.username.eq(username),
-                content.deletedDate.isNull()
+                content.deletedDate.isNull(),
+                content.groupId.isNull()
             )
             .fetchOne();
 
