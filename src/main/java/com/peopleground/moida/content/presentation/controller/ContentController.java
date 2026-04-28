@@ -44,6 +44,21 @@ public class ContentController {
     }
 
     /**
+     * 특정 모임(groupId)에 속한 게시글 목록을 조회한다.
+     * GET /api/v1/contents/groups/{groupId}
+     */
+    @GetMapping("/groups/{groupId}")
+    public ResponseEntity<PageResponse<ContentResponse>> getContentsByGroup(
+        @PathVariable Long groupId,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @AuthenticationPrincipal CustomUser user
+    ) {
+        PageResponse<ContentResponse> res = contentService.getContentsByGroupId(groupId, page, size, user);
+        return ResponseEntity.status(HttpStatus.OK).body(res);
+    }
+
+    /**
      * 현재 로그인한 사용자가 작성한 글 목록(최신순, 삭제글 제외) 을 반환한다.
      */
     @GetMapping("/me")

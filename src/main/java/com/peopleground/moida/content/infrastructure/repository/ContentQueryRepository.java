@@ -77,6 +77,66 @@ public class ContentQueryRepository {
         return new PageImpl<>(contents, pageable, total != null ? total : 0);
     }
 
+    /**
+     * groupId가 null인 게시글만 조회한다. 전체 피드에서 모임 게시글을 제외할 때 사용한다.
+     */
+    public Page<Content> findAllContentsWithoutGroup(Pageable pageable) {
+
+        QContent content = QContent.content;
+
+        List<Content> contents = queryFactory
+            .selectFrom(content)
+            .where(
+                content.deletedDate.isNull(),
+                content.groupId.isNull()
+            )
+            .orderBy(content.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(content.count())
+            .from(content)
+            .where(
+                content.deletedDate.isNull(),
+                content.groupId.isNull()
+            )
+            .fetchOne();
+
+        return new PageImpl<>(contents, pageable, total != null ? total : 0);
+    }
+
+    /**
+     * 특정 모임(groupId)에 속한 삭제되지 않은 게시글을 최신순으로 반환한다.
+     */
+    public Page<Content> findAllByGroupId(Long groupId, Pageable pageable) {
+
+        QContent content = QContent.content;
+
+        List<Content> contents = queryFactory
+            .selectFrom(content)
+            .where(
+                content.groupId.eq(groupId),
+                content.deletedDate.isNull()
+            )
+            .orderBy(content.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(content.count())
+            .from(content)
+            .where(
+                content.groupId.eq(groupId),
+                content.deletedDate.isNull()
+            )
+            .fetchOne();
+
+        return new PageImpl<>(contents, pageable, total != null ? total : 0);
+    }
+
     public Page<Content> findAllContentsIncludingDeleted(Pageable pageable) {
 
         QContent content = QContent.content;

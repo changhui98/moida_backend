@@ -40,7 +40,7 @@ public class ContentService {
     public ContentCreateResponse contentCreate(ContentCreateRequest req, CustomUser user) {
 
         User findUser = getUser(user);
-        Content content = contentRepository.save(Content.of(req.body(), findUser));
+        Content content = contentRepository.save(Content.of(req.body(), findUser, req.groupId()));
 
         // 태그가 있는 경우 태그 연동 처리
         List<String> tags = req.tags();
@@ -51,6 +51,9 @@ public class ContentService {
         return ContentCreateResponse.from(content);
     }
 
+    /**
+     * 전체 피드 게시글 목록 조회. groupId가 null인 게시글(모임 게시글 제외)만 반환한다.
+     */
     @Transactional(readOnly = true)
     public PageResponse<ContentResponse> getContents(
         int page, int size, String keyword, SearchType searchType, CustomUser user
@@ -59,8 +62,18 @@ public class ContentService {
 
         Page<Content> contents = (keyword != null && !keyword.isBlank())
             ? contentRepository.searchContents(keyword, searchType, pageable)
-            : contentRepository.findAllContents(pageable);
+            : contentRepository.findAllContentsWithoutGroup(pageable);
 
+        return PageResponse.from(contentResponseAssembler.toResponsePage(contents, user));
+    }
+
+    /**
+     * 특정 모임의 게시글 목록 조회.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<ContentResponse> getContentsByGroupId(Long groupId, int page, int size, CustomUser user) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Content> contents = contentRepository.findAllByGroupId(groupId, pageable);
         return PageResponse.from(contentResponseAssembler.toResponsePage(contents, user));
     }
 

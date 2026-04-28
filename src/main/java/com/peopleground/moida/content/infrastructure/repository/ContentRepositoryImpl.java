@@ -44,6 +44,18 @@ public class ContentRepositoryImpl implements ContentRepository {
     }
 
     @Override
+    public Page<Content> findAllContentsWithoutGroup(Pageable pageable) {
+
+        return contentQueryRepository.findAllContentsWithoutGroup(pageable);
+    }
+
+    @Override
+    public Page<Content> findAllByGroupId(Long groupId, Pageable pageable) {
+
+        return contentQueryRepository.findAllByGroupId(groupId, pageable);
+    }
+
+    @Override
     public Page<Content> findAllContentsIncludingDeleted(Pageable pageable) {
 
         return contentQueryRepository.findAllContentsIncludingDeleted(pageable);
