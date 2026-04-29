@@ -30,7 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final GeocodingClient geocodingClient;
-    private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final GeometryFactory geometryFactory;
 
     @Transactional(readOnly = true)
     public UserDetailResponse getMyProfile(CustomUser customUser) {

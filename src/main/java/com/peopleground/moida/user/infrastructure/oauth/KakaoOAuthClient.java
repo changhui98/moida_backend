@@ -2,6 +2,8 @@ package com.peopleground.moida.user.infrastructure.oauth;
 
 import com.peopleground.moida.global.exception.ApiErrorCode;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.user.application.port.OAuthClient;
+import com.peopleground.moida.user.application.port.OAuthUserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -15,8 +17,8 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 @Slf4j
-@Component
-public class KakaoOAuthClient {
+@Component("kakaoOAuthClient")
+public class KakaoOAuthClient implements OAuthClient {
 
     @Value("${oauth2.kakao.client-id}")
     private String clientId;
@@ -77,5 +79,17 @@ public class KakaoOAuthClient {
             log.error("[KakaoOAuthClient] 프로필 조회 실패", e);
             throw new AppException(ApiErrorCode.EXTERNAL_API_ERROR);
         }
+    }
+
+    @Override
+    public OAuthUserProfile fetchUserProfile(String accessToken) {
+        KakaoUserProfile profile = getUserProfile(accessToken);
+        String providerId = String.valueOf(profile.id());
+        return new OAuthUserProfile(
+            providerId,
+            profile.nickname(),
+            profile.email(),
+            profile.profileImageUrl()
+        );
     }
 }
