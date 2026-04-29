@@ -16,6 +16,7 @@ public record GroupDetailResponse(
     String leaderUsername,
     LocalDateTime createdDate,
     String imageUrl,
+    int likeCount,
     List<GroupMemberResponse> members
 ) {
 
@@ -31,6 +32,7 @@ public record GroupDetailResponse(
             group.getLeader().getUsername(),
             group.getCreatedDate(),
             group.getImageUrl(),
+            group.getLikeCount(),
             members
         );
     }

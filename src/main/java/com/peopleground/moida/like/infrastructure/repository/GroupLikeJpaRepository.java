@@ -1,6 +1,7 @@
 package com.peopleground.moida.like.infrastructure.repository;
 
 import com.peopleground.moida.like.domain.entity.GroupLike;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,6 +14,9 @@ public interface GroupLikeJpaRepository extends JpaRepository<GroupLike, Long> {
     Optional<GroupLike> findByGroupIdAndUserId(Long groupId, UUID userId);
 
     boolean existsByGroupIdAndUserId(Long groupId, UUID userId);
+
+    @Query("SELECT gl FROM p_group_like gl JOIN FETCH gl.user WHERE gl.group.id = :groupId")
+    List<GroupLike> findByGroupId(@Param("groupId") Long groupId);
 
     /**
      * PostgreSQL ON CONFLICT DO NOTHING 패턴으로 동시성-안전 삽입을 수행한다.
