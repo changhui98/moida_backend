@@ -1,5 +1,6 @@
 package com.peopleground.moida.tag.presentation.controller;
 
+import com.peopleground.moida.content.application.service.ContentService;
 import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.dto.PageResponse;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TagController {
 
     private final TagService tagService;
+    private final ContentService contentService;
 
     /**
      * 인기 태그 목록 조회 (상위 N개, postCount 내림차순)
@@ -57,7 +59,7 @@ public class TagController {
         @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
         @AuthenticationPrincipal CustomUser user
     ) {
-        PageResponse<ContentResponse> res = tagService.getContentsByTagName(name, page, size, user);
+        PageResponse<ContentResponse> res = contentService.getContentsByTagName(name, page, size, user);
         return ResponseEntity.status(HttpStatus.OK).body(res);
     }
 }

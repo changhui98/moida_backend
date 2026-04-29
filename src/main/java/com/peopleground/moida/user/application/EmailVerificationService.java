@@ -8,9 +8,9 @@ import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.EmailVerificationTempRepository;
 import com.peopleground.moida.user.domain.repository.EmailVerificationTokenRepository;
 import com.peopleground.moida.user.domain.repository.UserRepository;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class EmailVerificationService {
+
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final EmailVerificationTempRepository emailVerificationTempRepository;
@@ -35,7 +37,7 @@ public class EmailVerificationService {
             throw new AppException(UserErrorCode.EMAIL_ALREADY_VERIFIED);
         }
 
-        String code = String.format("%06d", new Random().nextInt(1000000));
+        String code = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
 
         emailVerificationTokenRepository.findByUserEmail(userEmail)
             .ifPresent(token -> emailVerificationTokenRepository.deleteByUser(user));
@@ -52,10 +54,12 @@ public class EmailVerificationService {
         EmailVerificationToken token = emailVerificationTokenRepository.findByUserEmail(userEmail)
             .orElseThrow(() -> new AppException(UserErrorCode.INVALID_VERIFICATION_CODE));
 
+        // User를 1회만 조회하여 만료/검증/처리에 재사용
+        User user = userRepository.findByUserEmail(userEmail).orElseThrow(
+            () -> new AppException(UserErrorCode.USER_NOT_FOUND)
+        );
+
         if (token.isExpired()) {
-            User user = userRepository.findByUserEmail(userEmail).orElseThrow(
-                () -> new AppException(UserErrorCode.USER_NOT_FOUND)
-            );
             emailVerificationTokenRepository.deleteByUser(user);
             throw new AppException(UserErrorCode.INVALID_VERIFICATION_CODE);
         }
@@ -64,11 +68,7 @@ public class EmailVerificationService {
             throw new AppException(UserErrorCode.INVALID_VERIFICATION_CODE);
         }
 
-        User user = userRepository.findByUserEmail(userEmail).orElseThrow(
-            () -> new AppException(UserErrorCode.USER_NOT_FOUND)
-        );
         user.verifyEmail();
-
         emailVerificationTokenRepository.deleteByUser(user);
     }
 
@@ -89,7 +89,7 @@ public class EmailVerificationService {
             emailVerificationTempRepository.deleteByEmail(email);
         }
 
-        String code = String.format("%06d", new Random().nextInt(1000000));
+        String code = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
         EmailVerificationTemp temp = EmailVerificationTemp.of(email, code);
         emailVerificationTempRepository.save(temp);
 

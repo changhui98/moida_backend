@@ -1,11 +1,6 @@
 package com.peopleground.moida.tag.application.service;
 
-import com.peopleground.moida.content.application.assembler.ContentResponseAssembler;
 import com.peopleground.moida.content.domain.entity.Content;
-import com.peopleground.moida.content.domain.repository.ContentRepository;
-import com.peopleground.moida.content.presentation.dto.response.ContentResponse;
-import com.peopleground.moida.global.configure.CustomUser;
-import com.peopleground.moida.global.dto.PageResponse;
 import com.peopleground.moida.tag.domain.TagErrorCode;
 import com.peopleground.moida.tag.domain.entity.ContentTag;
 import com.peopleground.moida.tag.domain.entity.Tag;
@@ -21,9 +16,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,8 +30,6 @@ public class TagService {
 
     private final TagRepository tagRepository;
     private final ContentTagRepository contentTagRepository;
-    private final ContentRepository contentRepository;
-    private final ContentResponseAssembler contentResponseAssembler;
 
     /**
      * 인기 태그 목록을 조회한다. (Cache-Aside, TTL 은 Redis 설정에서 관리)
@@ -74,22 +64,6 @@ public class TagService {
             .stream()
             .map(TagResponse::from)
             .toList();
-    }
-
-    /**
-     * 특정 태그의 게시글 목록을 조회한다.
-     *
-     * <p>작성자 닉네임과 현재 로그인 사용자의 좋아요 여부(likedByMe)를
-     * {@link ContentResponseAssembler} 를 통해 일관되게 배치로 채운다.
-     * 비로그인 호출의 경우 user 가 null 이며 likedByMe 는 모두 false.</p>
-     */
-    @Transactional(readOnly = true)
-    public PageResponse<ContentResponse> getContentsByTagName(
-        String tagName, int page, int size, CustomUser user
-    ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Content> contents = contentRepository.findAllByTagName(tagName, pageable);
-        return PageResponse.from(contentResponseAssembler.toResponsePage(contents, user));
     }
 
     /**

@@ -4,9 +4,7 @@ import com.peopleground.moida.user.domain.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -15,9 +13,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class AuditingEntity extends BaseEntity{
+public class AuditingEntity extends BaseEntity {
 
-    private static final Clock KST_CLOCK = Clock.system(ZoneId.of("Asia/Seoul"));
+    // KST_CLOCK 은 BaseEntity 에서 상속 (중복 선언 제거)
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, length = 50)

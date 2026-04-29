@@ -18,7 +18,7 @@ public class BaseEntity {
      * JVM 기본 타임존 설정(MoidaApplication)과 별개로, 운영 환경의 TZ 변수에 흔들리지 않도록
      * 명시적으로 KST Clock 을 사용한다.
      */
-    private static final Clock KST_CLOCK = Clock.system(ZoneId.of("Asia/Seoul"));
+    protected static final Clock KST_CLOCK = Clock.system(ZoneId.of("Asia/Seoul"));
 
     @Column(name = "created_date", nullable = false, updatable = false)
     protected LocalDateTime createdDate;

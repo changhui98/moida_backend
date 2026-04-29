@@ -2,6 +2,8 @@ package com.peopleground.moida.user.infrastructure.oauth;
 
 import com.peopleground.moida.global.exception.ApiErrorCode;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.user.application.port.OAuthClient;
+import com.peopleground.moida.user.application.port.OAuthUserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -14,8 +16,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Map;
 
 @Slf4j
-@Component
-public class GoogleOAuthClient {
+@Component("googleOAuthClient")
+public class GoogleOAuthClient implements OAuthClient {
 
     @Value("${oauth2.google.client-id}")
     private String clientId;
@@ -74,5 +76,16 @@ public class GoogleOAuthClient {
             log.error("[GoogleOAuthClient] 프로필 조회 실패", e);
             throw new AppException(ApiErrorCode.EXTERNAL_API_ERROR);
         }
+    }
+
+    @Override
+    public OAuthUserProfile fetchUserProfile(String accessToken) {
+        GoogleUserProfile profile = getUserProfile(accessToken);
+        return new OAuthUserProfile(
+            profile.sub(),
+            profile.name() != null ? profile.name() : "구글사용자",
+            profile.email(),
+            profile.picture()
+        );
     }
 }

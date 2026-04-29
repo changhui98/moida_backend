@@ -28,7 +28,7 @@ public class AuthService {
     private final EmailVerificationService emailVerificationService;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenBlacklistService tokenBlacklistService;
-    private final GeometryFactory geometryFactory = new GeometryFactory();
+    private final GeometryFactory geometryFactory;
 
     @Transactional
     public UserCreateResponse signUp(UserCreateRequest request) {

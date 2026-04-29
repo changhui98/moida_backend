@@ -2,6 +2,7 @@ package com.peopleground.moida.place.infrastructure;
 
 import com.peopleground.moida.global.exception.ApiErrorCode;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.place.application.port.PlaceAutocompletePort;
 import com.peopleground.moida.place.infrastructure.dto.GooglePlacesAutocompleteResponse;
 import com.peopleground.moida.place.infrastructure.dto.GooglePlacesAutocompleteResponse.Suggestion;
 import com.peopleground.moida.place.presentation.dto.response.PlaceSuggestionResponse;
@@ -16,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 @Slf4j
 @Component
-public class GooglePlaceClient {
+public class GooglePlaceClient implements PlaceAutocompletePort {
 
     @Value("${google.maps.api-key}")
     private String apiKey;
@@ -27,6 +28,7 @@ public class GooglePlaceClient {
      */
     private final WebClient webClient = WebClient.create("https://places.googleapis.com");
 
+    @Override
     public List<PlaceSuggestionResponse> autocomplete(String query) {
         if (apiKey == null || apiKey.isBlank()) {
             log.error("[GooglePlaces] GOOGLE_MAPS_API_KEY is blank. query={}", query);
