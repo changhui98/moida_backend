@@ -47,6 +47,7 @@ public class GroupService {
             request.name(),
             request.description(),
             request.category(),
+            request.meetingType(),
             request.maxMemberCount(),
             leader
         );
@@ -98,6 +99,7 @@ public class GroupService {
             request.name(),
             request.description(),
             request.category(),
+            request.meetingType(),
             request.maxMemberCount()
         );
 

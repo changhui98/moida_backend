@@ -40,6 +40,10 @@ public class Group extends AuditingEntity {
     @Column(nullable = false)
     private GroupCategory category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private GroupMeetingType meetingType;
+
     @Column(nullable = false)
     private int maxMemberCount;
 
@@ -60,6 +64,7 @@ public class Group extends AuditingEntity {
         String name,
         String description,
         GroupCategory category,
+        GroupMeetingType meetingType,
         int maxMemberCount,
         User leader
     ) {
@@ -67,6 +72,7 @@ public class Group extends AuditingEntity {
         group.name = name;
         group.description = description;
         group.category = category;
+        group.meetingType = meetingType;
         group.maxMemberCount = maxMemberCount;
         group.currentMemberCount = 0;
         group.likeCount = 0;
@@ -74,10 +80,11 @@ public class Group extends AuditingEntity {
         return group;
     }
 
-    public void update(String name, String description, GroupCategory category, int maxMemberCount) {
+    public void update(String name, String description, GroupCategory category, GroupMeetingType meetingType, int maxMemberCount) {
         this.name = name;
         this.description = description;
         this.category = category;
+        this.meetingType = meetingType;
         this.maxMemberCount = maxMemberCount;
     }
 
