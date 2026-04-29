@@ -138,6 +138,22 @@ public class ContentService {
         return content;
     }
 
+    /**
+     * 특정 태그의 게시글 목록을 조회한다.
+     *
+     * <p>작성자 닉네임과 현재 로그인 사용자의 좋아요 여부(likedByMe)를
+     * {@link ContentResponseAssembler}를 통해 일관되게 배치로 채운다.
+     * 비로그인 호출의 경우 user 가 null 이며 likedByMe 는 모두 false.</p>
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<ContentResponse> getContentsByTagName(
+        String tagName, int page, int size, CustomUser user
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Content> contents = contentRepository.findAllByTagName(tagName, pageable);
+        return PageResponse.from(contentResponseAssembler.toResponsePage(contents, user));
+    }
+
     private User getUser(CustomUser user) {
 
         return userRepository.findByUsername(user.getUsername())

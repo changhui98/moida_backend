@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,6 +57,16 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDetailResponse> getGroup(@PathVariable Long groupId) {
         GroupDetailResponse response = groupService.getGroup(groupId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping(value = "/{groupId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<GroupResponse> updateGroupImage(
+        @PathVariable Long groupId,
+        @RequestParam("file") MultipartFile file,
+        @AuthenticationPrincipal CustomUser customUser
+    ) {
+        GroupResponse response = groupService.updateGroupImage(groupId, file, customUser);
         return ResponseEntity.ok(response);
     }
 

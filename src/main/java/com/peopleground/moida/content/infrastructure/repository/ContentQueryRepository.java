@@ -140,9 +140,11 @@ public class ContentQueryRepository {
     public Page<Content> findAllContentsIncludingDeleted(Pageable pageable) {
 
         QContent content = QContent.content;
+        QUser user = QUser.user;
 
         List<Content> contents = queryFactory
             .selectFrom(content)
+            .join(content.user, user).fetchJoin()
             .orderBy(content.createdDate.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
