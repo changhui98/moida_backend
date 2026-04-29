@@ -24,10 +24,12 @@ public class GroupQueryRepository {
 
     public Optional<Group> findById(Long id) {
         QGroup group = QGroup.group;
+        QUser leader = QUser.user;
 
         return Optional.ofNullable(
             queryFactory
                 .selectFrom(group)
+                .join(group.leader, leader).fetchJoin()
                 .where(
                     group.id.eq(id),
                     group.deletedDate.isNull()
@@ -49,8 +51,11 @@ public class GroupQueryRepository {
             builder.and(group.category.eq(category));
         }
 
+        QUser leader = QUser.user;
+
         List<Group> groups = queryFactory
             .selectFrom(group)
+            .join(group.leader, leader).fetchJoin()
             .where(builder)
             .orderBy(group.createdDate.desc())
             .offset(pageable.getOffset())
@@ -69,10 +74,12 @@ public class GroupQueryRepository {
     public Page<Group> findByMemberUsername(String username, Pageable pageable) {
         QGroup group = QGroup.group;
         QGroupMember groupMember = QGroupMember.groupMember;
-        QUser user = QUser.user;
+        QUser user = new QUser("memberUser");
+        QUser leader = new QUser("leader");
 
         List<Group> groups = queryFactory
             .selectFrom(group)
+            .join(group.leader, leader).fetchJoin()
             .join(groupMember).on(groupMember.group.eq(group))
             .join(groupMember.user, user)
             .where(

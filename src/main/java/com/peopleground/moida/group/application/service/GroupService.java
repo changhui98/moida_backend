@@ -15,6 +15,9 @@ import com.peopleground.moida.group.presentation.dto.request.GroupUpdateRequest;
 import com.peopleground.moida.group.presentation.dto.response.GroupDetailResponse;
 import com.peopleground.moida.group.presentation.dto.response.GroupMemberResponse;
 import com.peopleground.moida.group.presentation.dto.response.GroupResponse;
+import com.peopleground.moida.image.application.service.ImageService;
+import com.peopleground.moida.image.domain.entity.ImageTargetType;
+import com.peopleground.moida.image.presentation.dto.response.ImageResponse;
 import com.peopleground.moida.user.domain.UserErrorCode;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     @Transactional
     public GroupResponse createGroup(GroupCreateRequest request, CustomUser customUser) {
@@ -51,7 +56,7 @@ public class GroupService {
         // 생성자를 자동으로 LEADER로 등록
         GroupMember leaderMember = GroupMember.of(saved, leader, GroupMemberRole.LEADER);
         groupMemberRepository.save(leaderMember);
-        saved.incrementMemberCount();
+        groupRepository.incrementMemberCount(saved.getId());
 
         return GroupResponse.from(saved);
     }
@@ -71,6 +76,17 @@ public class GroupService {
             .map(GroupMemberResponse::from)
             .toList();
         return GroupDetailResponse.of(group, members);
+    }
+
+    @Transactional
+    public GroupResponse updateGroupImage(Long groupId, MultipartFile file, CustomUser customUser) {
+        Group group = findGroup(groupId);
+        validateLeader(group, customUser.getUsername());
+
+        ImageResponse imageResponse = imageService.uploadImage(file, ImageTargetType.GROUP, String.valueOf(groupId));
+        group.updateImageUrl(imageResponse.fileUrl());
+
+        return GroupResponse.from(group);
     }
 
     @Transactional
@@ -116,7 +132,7 @@ public class GroupService {
         GroupMember member = GroupMember.of(group, user, GroupMemberRole.MEMBER);
         groupMemberRepository.save(member);
 
-        group.incrementMemberCount();
+        groupRepository.incrementMemberCount(groupId);
     }
 
     @Transactional
@@ -129,9 +145,9 @@ public class GroupService {
             throw new AppException(GroupErrorCode.GROUP_LEADER_CANNOT_LEAVE);
         }
 
-        Group group = findGroup(groupId);
+        findGroup(groupId);
         groupMemberRepository.delete(member);
-        group.decrementMemberCount();
+        groupRepository.decrementMemberCount(groupId);
     }
 
     @Transactional
@@ -144,7 +160,7 @@ public class GroupService {
             .orElseThrow(() -> new AppException(GroupErrorCode.GROUP_MEMBER_NOT_FOUND));
 
         groupMemberRepository.delete(targetMember);
-        group.decrementMemberCount();
+        groupRepository.decrementMemberCount(groupId);
     }
 
     @Transactional(readOnly = true)

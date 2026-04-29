@@ -12,7 +12,8 @@ public interface GroupMemberJpaRepository extends JpaRepository<GroupMember, Lon
     @Query("SELECT gm FROM p_group_member gm JOIN gm.user u WHERE gm.group.id = :groupId AND u.username = :username")
     Optional<GroupMember> findByGroupIdAndUsername(@Param("groupId") Long groupId, @Param("username") String username);
 
-    List<GroupMember> findByGroupId(Long groupId);
+    @Query("SELECT gm FROM p_group_member gm JOIN FETCH gm.user WHERE gm.group.id = :groupId AND gm.deletedDate IS NULL")
+    List<GroupMember> findByGroupId(@Param("groupId") Long groupId);
 
     @Query("SELECT CASE WHEN COUNT(gm) > 0 THEN true ELSE false END FROM p_group_member gm JOIN gm.user u WHERE gm.group.id = :groupId AND u.username = :username")
     boolean existsByGroupIdAndUsername(@Param("groupId") Long groupId, @Param("username") String username);

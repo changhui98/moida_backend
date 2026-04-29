@@ -32,6 +32,7 @@ public class UserQueryRepository {
         List<User> content = queryFactory
             .selectFrom(user)
             .where(user.deletedDate.isNull())
+            .orderBy(user.createdDate.desc())
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
