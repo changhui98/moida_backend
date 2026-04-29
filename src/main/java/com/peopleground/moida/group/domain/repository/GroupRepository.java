@@ -15,4 +15,14 @@ public interface GroupRepository {
     Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category);
 
     Page<Group> findByMemberUsername(String username, Pageable pageable);
+
+    void incrementMemberCount(Long groupId);
+
+    void decrementMemberCount(Long groupId);
+
+    void incrementLikeCount(Long groupId);
+
+    void decrementLikeCount(Long groupId);
+
+    Integer findLikeCountById(Long groupId);
 }

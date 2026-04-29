@@ -35,4 +35,29 @@ public class GroupRepositoryImpl implements GroupRepository {
     public Page<Group> findByMemberUsername(String username, Pageable pageable) {
         return groupQueryRepository.findByMemberUsername(username, pageable);
     }
+
+    @Override
+    public void incrementMemberCount(Long groupId) {
+        groupJpaRepository.incrementMemberCount(groupId);
+    }
+
+    @Override
+    public void decrementMemberCount(Long groupId) {
+        groupJpaRepository.decrementMemberCount(groupId);
+    }
+
+    @Override
+    public void incrementLikeCount(Long groupId) {
+        groupJpaRepository.incrementLikeCount(groupId);
+    }
+
+    @Override
+    public void decrementLikeCount(Long groupId) {
+        groupJpaRepository.decrementLikeCount(groupId);
+    }
+
+    @Override
+    public Integer findLikeCountById(Long groupId) {
+        return groupJpaRepository.findLikeCountById(groupId);
+    }
 }

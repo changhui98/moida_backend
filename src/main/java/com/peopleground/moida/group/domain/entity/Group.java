@@ -49,6 +49,9 @@ public class Group extends AuditingEntity {
     @Column(nullable = true)
     private String imageUrl;
 
+    @Column(nullable = false)
+    private int likeCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leader_id", nullable = false)
     private User leader;
@@ -66,6 +69,7 @@ public class Group extends AuditingEntity {
         group.category = category;
         group.maxMemberCount = maxMemberCount;
         group.currentMemberCount = 0;
+        group.likeCount = 0;
         group.leader = leader;
         return group;
     }
