@@ -8,9 +8,14 @@ import com.peopleground.moida.content.domain.entity.Content;
 import com.peopleground.moida.content.domain.repository.ContentRepository;
 import com.peopleground.moida.global.configure.CustomUser;
 import com.peopleground.moida.global.exception.AppException;
+import com.peopleground.moida.group.domain.GroupErrorCode;
+import com.peopleground.moida.group.domain.entity.Group;
+import com.peopleground.moida.group.domain.repository.GroupRepository;
 import com.peopleground.moida.like.domain.entity.ContentLike;
+import com.peopleground.moida.like.domain.entity.GroupLike;
 import com.peopleground.moida.like.domain.repository.CommentLikeRepository;
 import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
+import com.peopleground.moida.like.domain.repository.GroupLikeRepository;
 import com.peopleground.moida.like.presentation.dto.response.LikeStatusResponse;
 import com.peopleground.moida.like.presentation.dto.response.LikeToggleResponse;
 import com.peopleground.moida.user.domain.UserErrorCode;
@@ -28,8 +33,10 @@ public class LikeService {
 
     private final ContentLikeRepository contentLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final GroupLikeRepository groupLikeRepository;
     private final ContentRepository contentRepository;
     private final CommentRepository commentRepository;
+    private final GroupRepository groupRepository;
     private final UserRepository userRepository;
 
     /**
@@ -117,6 +124,44 @@ public class LikeService {
         return LikeStatusResponse.of(liked);
     }
 
+    /**
+     * 모임 좋아요 토글.
+     *
+     * <p>동시성 전략은 게시글 좋아요 토글과 동일하다.
+     * INSERT ... ON CONFLICT DO NOTHING + 원자 UPDATE 로 Lost Update 를 방지한다.</p>
+     */
+    @Transactional
+    public LikeToggleResponse toggleGroupLike(Long groupId, CustomUser customUser) {
+        Group group = groupRepository.findById(groupId)
+            .orElseThrow(() -> new AppException(GroupErrorCode.GROUP_NOT_FOUND));
+
+        User user = getUser(customUser);
+
+        Optional<GroupLike> existingLike = groupLikeRepository.findByGroupIdAndUserId(groupId, user.getId());
+
+        if (existingLike.isPresent()) {
+            groupLikeRepository.delete(existingLike.get());
+            groupRepository.decrementLikeCount(groupId);
+            return LikeToggleResponse.unliked(currentGroupLikeCount(groupId));
+        }
+
+        int inserted = groupLikeRepository.insertIfNotExists(group.getId(), user.getId());
+        if (inserted == 1) {
+            groupRepository.incrementLikeCount(groupId);
+        }
+        return LikeToggleResponse.liked(currentGroupLikeCount(groupId));
+    }
+
+    /**
+     * 내 모임 좋아요 여부 확인
+     */
+    @Transactional(readOnly = true)
+    public LikeStatusResponse getGroupLikeStatus(Long groupId, CustomUser customUser) {
+        User user = getUser(customUser);
+        boolean liked = groupLikeRepository.existsByGroupIdAndUserId(groupId, user.getId());
+        return LikeStatusResponse.of(liked);
+    }
+
     private User getUser(CustomUser customUser) {
         return userRepository.findByUsername(customUser.getUsername())
             .orElseThrow(() -> new AppException(UserErrorCode.USER_NOT_FOUND));
@@ -129,6 +174,11 @@ public class LikeService {
 
     private int currentCommentLikeCount(Long commentId) {
         Integer value = commentRepository.findLikeCountById(commentId);
+        return value != null ? value : 0;
+    }
+
+    private int currentGroupLikeCount(Long groupId) {
+        Integer value = groupRepository.findLikeCountById(groupId);
         return value != null ? value : 0;
     }
 }
