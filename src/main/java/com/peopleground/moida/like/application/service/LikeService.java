@@ -16,11 +16,13 @@ import com.peopleground.moida.like.domain.entity.GroupLike;
 import com.peopleground.moida.like.domain.repository.CommentLikeRepository;
 import com.peopleground.moida.like.domain.repository.ContentLikeRepository;
 import com.peopleground.moida.like.domain.repository.GroupLikeRepository;
+import com.peopleground.moida.like.presentation.dto.response.GroupLikerResponse;
 import com.peopleground.moida.like.presentation.dto.response.LikeStatusResponse;
 import com.peopleground.moida.like.presentation.dto.response.LikeToggleResponse;
 import com.peopleground.moida.user.domain.UserErrorCode;
 import com.peopleground.moida.user.domain.entity.User;
 import com.peopleground.moida.user.domain.repository.UserRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -160,6 +162,19 @@ public class LikeService {
         User user = getUser(customUser);
         boolean liked = groupLikeRepository.existsByGroupIdAndUserId(groupId, user.getId());
         return LikeStatusResponse.of(liked);
+    }
+
+    /**
+     * 모임 좋아요한 사용자 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<GroupLikerResponse> getGroupLikers(Long groupId) {
+        groupRepository.findById(groupId)
+            .orElseThrow(() -> new AppException(GroupErrorCode.GROUP_NOT_FOUND));
+        return groupLikeRepository.findByGroupId(groupId)
+            .stream()
+            .map(gl -> GroupLikerResponse.from(gl.getUser()))
+            .toList();
     }
 
     private User getUser(CustomUser customUser) {

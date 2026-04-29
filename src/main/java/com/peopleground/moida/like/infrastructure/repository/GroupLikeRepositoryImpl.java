@@ -2,6 +2,7 @@ package com.peopleground.moida.like.infrastructure.repository;
 
 import com.peopleground.moida.like.domain.entity.GroupLike;
 import com.peopleground.moida.like.domain.repository.GroupLikeRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -36,5 +37,10 @@ public class GroupLikeRepositoryImpl implements GroupLikeRepository {
     @Override
     public int insertIfNotExists(Long groupId, UUID userId) {
         return groupLikeJpaRepository.insertIfNotExists(groupId, userId);
+    }
+
+    @Override
+    public List<GroupLike> findByGroupId(Long groupId) {
+        return groupLikeJpaRepository.findByGroupId(groupId);
     }
 }

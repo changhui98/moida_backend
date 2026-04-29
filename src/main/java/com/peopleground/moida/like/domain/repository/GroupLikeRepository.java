@@ -1,6 +1,7 @@
 package com.peopleground.moida.like.domain.repository;
 
 import com.peopleground.moida.like.domain.entity.GroupLike;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -19,4 +20,6 @@ public interface GroupLikeRepository {
      * 예외 없이 실제 삽입된 행 수(0 또는 1)를 반환한다.
      */
     int insertIfNotExists(Long groupId, UUID userId);
+
+    List<GroupLike> findByGroupId(Long groupId);
 }
