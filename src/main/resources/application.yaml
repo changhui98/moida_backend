@@ -4,31 +4,32 @@ server:
 spring:
   application:
     name: moida
-  config:
-    import: optional:file:.env
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   servlet:
     multipart:
       max-file-size: 5MB
       max-request-size: 20MB
   datasource:
-    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
-  sql:
-    init:
-      mode: always
   jpa:
-    defer-datasource-initialization: true
+    defer-datasource-initialization: false
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
       hibernate:
-        format_sql: true
-        show_sql: true
         jdbc:
           time_zone: Asia/Seoul
     open-in-view: false
+  flyway:
+    enabled: true
+    # dev: V1 + V2(시드), prod: V1만 실행
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
   mail:
     host: smtp.gmail.com
     port: 587
@@ -40,22 +41,22 @@ spring:
           auth: true
           starttls:
             enable: true
-
-  ## Redis - 조회수/좋아요 카운트/인기 태그/게시글 목록 캐싱용
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-
-  ## Spring Cache 설정
   cache:
     type: redis
 
-## p6spy
-decorator:
-  datasource:
-    p6spy:
-      enable-logging: on
+## Spring Boot Actuator - 헬스체크 (Docker HEALTHCHECK에서 사용)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
 
 ## logging
 logging:
@@ -66,7 +67,6 @@ logging:
   level:
     root: info
     web: info
-    com.malgn: debug
 
 ## jwt
 jwt:

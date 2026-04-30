@@ -1,0 +1,27 @@
+## 운영 환경 전용 설정
+spring:
+  sql:
+    init:
+      mode: never
+  flyway:
+    # 운영: V1(스키마)까지만 실행, V2(개발 시드) 제외
+    target: 1
+  jpa:
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+
+## p6spy 비활성화 (운영 성능 보호)
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: off
+
+## 운영 로그 레벨
+logging:
+  level:
+    root: warn
+    web: warn
+    com.peopleground: info
+    org.flywaydb: info
