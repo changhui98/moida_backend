@@ -54,6 +54,31 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * 생성된 지 7일 미만인 신규 모임 목록을 조회합니다.
+     * 인증 없이 접근 가능하지만, 클라이언트는 토큰을 포함하여 호출합니다.
+     */
+    @GetMapping("/recent")
+    public ResponseEntity<PageResponse<GroupResponse>> getNewGroups(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        PageResponse<GroupResponse> response = groupService.getNewGroups(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 좋아요 수 내림차순으로 인기 모임 목록을 조회합니다.
+     */
+    @GetMapping("/popular")
+    public ResponseEntity<PageResponse<GroupResponse>> getPopularGroups(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        PageResponse<GroupResponse> response = groupService.getPopularGroups(page, size);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDetailResponse> getGroup(@PathVariable Long groupId) {
         GroupDetailResponse response = groupService.getGroup(groupId);
