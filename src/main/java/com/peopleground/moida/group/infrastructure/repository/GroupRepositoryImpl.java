@@ -32,6 +32,16 @@ public class GroupRepositoryImpl implements GroupRepository {
     }
 
     @Override
+    public Page<Group> findNewGroups(Pageable pageable) {
+        return groupQueryRepository.findNewGroups(pageable);
+    }
+
+    @Override
+    public Page<Group> findPopularGroups(Pageable pageable) {
+        return groupQueryRepository.findPopularGroups(pageable);
+    }
+
+    @Override
     public Page<Group> findByMemberUsername(String username, Pageable pageable) {
         return groupQueryRepository.findByMemberUsername(username, pageable);
     }

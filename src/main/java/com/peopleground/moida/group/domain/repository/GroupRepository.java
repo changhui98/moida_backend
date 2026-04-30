@@ -14,6 +14,10 @@ public interface GroupRepository {
 
     Page<Group> findAll(Pageable pageable, String keyword, GroupCategory category);
 
+    Page<Group> findNewGroups(Pageable pageable);
+
+    Page<Group> findPopularGroups(Pageable pageable);
+
     Page<Group> findByMemberUsername(String username, Pageable pageable);
 
     void incrementMemberCount(Long groupId);

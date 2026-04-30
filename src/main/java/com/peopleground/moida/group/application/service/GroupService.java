@@ -48,6 +48,7 @@ public class GroupService {
             request.description(),
             request.category(),
             request.meetingType(),
+            request.region(),
             request.maxMemberCount(),
             leader
         );
@@ -66,6 +67,26 @@ public class GroupService {
     public PageResponse<GroupResponse> getGroups(int page, int size, String keyword, GroupCategory category) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Group> groups = groupRepository.findAll(pageable, keyword, category);
+        return PageResponse.from(groups.map(GroupResponse::from));
+    }
+
+    /**
+     * 생성된 지 7일 미만인 신규 모임 목록을 조회합니다.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<GroupResponse> getNewGroups(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Group> groups = groupRepository.findNewGroups(pageable);
+        return PageResponse.from(groups.map(GroupResponse::from));
+    }
+
+    /**
+     * 좋아요 수 내림차순으로 인기 모임 목록을 조회합니다.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<GroupResponse> getPopularGroups(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Group> groups = groupRepository.findPopularGroups(pageable);
         return PageResponse.from(groups.map(GroupResponse::from));
     }
 
@@ -100,6 +121,7 @@ public class GroupService {
             request.description(),
             request.category(),
             request.meetingType(),
+            request.region(),
             request.maxMemberCount()
         );
 
