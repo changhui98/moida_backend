@@ -36,7 +36,7 @@ GET /api/v1/admin/users?page=0&size=10
       "id": "aaaaaaaa-0000-0000-0000-000000000001",
       "username": "admin",
       "nickname": "관리자",
-      "userEmail": "admin@moida.com",
+      "userEmail": "admin@sagwim.com",
       "address": "서울 강남구 삼성동",
       "isDeleted": false
     },
@@ -44,7 +44,7 @@ GET /api/v1/admin/users?page=0&size=10
       "id": "aaaaaaaa-0000-0000-0000-000000000002",
       "username": "user1",
       "nickname": "유저일",
-      "userEmail": "user1@moida.com",
+      "userEmail": "user1@sagwim.com",
       "address": "서울 마포구 합정동",
       "isDeleted": false
     }
@@ -85,7 +85,7 @@ GET /api/v1/admin/users/user1
   "id": "aaaaaaaa-0000-0000-0000-000000000002",
   "username": "user1",
   "nickname": "유저일",
-  "userEmail": "user1@moida.com",
+  "userEmail": "user1@sagwim.com",
   "role": "USER",
   "address": "서울 마포구 합정동",
   "createAt": "2026-04-17T10:00:00",

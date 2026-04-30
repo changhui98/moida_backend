@@ -24,18 +24,18 @@ RUN ./gradlew bootJar --no-daemon -x test
 FROM eclipse-temurin:25-jre-alpine AS runtime
 
 # 보안: non-root 사용자
-RUN addgroup -S moida && adduser -S moida -G moida
+RUN addgroup -S sagwim && adduser -S sagwim -G sagwim
 
 WORKDIR /app
 
 # 업로드 디렉토리 생성 (볼륨 마운트 대상)
-RUN mkdir -p /app/uploads/images && chown -R moida:moida /app
+RUN mkdir -p /app/uploads/images && chown -R sagwim:sagwim /app
 
 # 빌드 산출물 복사
 COPY --from=builder /workspace/build/libs/*.jar app.jar
-RUN chown moida:moida app.jar
+RUN chown sagwim:sagwim app.jar
 
-USER moida
+USER sagwim
 
 # 헬스체크 - Spring Boot Actuator /actuator/health 엔드포인트
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

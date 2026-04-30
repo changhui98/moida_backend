@@ -15,7 +15,7 @@ services:
   # Redis 7 - 조회수 Write-through, 좋아요 카운트, 인기 태그, 게시글 목록 캐싱용
   redis:
     image: redis:7-alpine
-    container_name: moida-redis
+    container_name: sagwim-redis
     ports:
       - "6379:6379"
     volumes:
