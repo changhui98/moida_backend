@@ -57,6 +57,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth ->
                 auth
+                    // Docker 헬스체크 및 모니터링 (인증 불필요)
+                    .requestMatchers("/actuator/health").permitAll()
+                    // Swagger UI (개발/운영 모두 접근 허용 — 필요 시 prod 프로파일에서 비활성화)
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     // 로그아웃은 인증 필요 (토큰을 블랙리스트에 등록해야 하므로)
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-out").authenticated()
                     .requestMatchers("/api/v1/auth/**").permitAll()
