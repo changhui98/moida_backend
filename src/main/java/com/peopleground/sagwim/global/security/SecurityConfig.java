@@ -7,6 +7,7 @@ import com.peopleground.sagwim.global.redis.TokenBlacklistService;
 import com.peopleground.sagwim.global.security.jwt.JwtAuthenticationFilter;
 import com.peopleground.sagwim.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -46,6 +47,22 @@ public class SecurityConfig {
         return filter;
     }
 
+    /**
+     * AuthenticationFilter를 서블릿 컨테이너에 직접 등록하지 않도록 방지한다.
+     * Spring Boot는 Filter 타입의 @Bean을 자동으로 서블릿 컨테이너에 등록하는데,
+     * SecurityFilterChain에 이미 포함된 필터가 서블릿 레벨에서 이중 실행되면
+     * /api/v1/auth/sign-in 요청이 Security 필터 체인에 도달하기 전에 처리되어
+     * 예상치 못한 404 또는 인증 오류가 발생한다.
+     */
+    @Bean
+    public FilterRegistrationBean<AuthenticationFilter> authenticationFilterRegistration(
+        AuthenticationFilter authenticationFilter
+    ) {
+        FilterRegistrationBean<AuthenticationFilter> registration = new FilterRegistrationBean<>(authenticationFilter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http, AuthenticationFilter authenticationFilter) throws Exception {
 
@@ -54,6 +71,9 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             .csrf(AbstractHttpConfigurer::disable)
+            // form 로그인/HTTP Basic 비활성화: JWT 기반 Stateless 인증만 사용
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth ->
                 auth
