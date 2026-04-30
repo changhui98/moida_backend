@@ -20,7 +20,7 @@
   "username": "user4",
   "password": "Test1234!",
   "nickname": "유저사",
-  "userEmail": "user4@moida.com",
+  "userEmail": "user4@sagwim.com",
   "address": "서울 강동구 천호동"
 }
 ```

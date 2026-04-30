@@ -19,7 +19,7 @@
   "id": "aaaaaaaa-0000-0000-0000-000000000002",
   "username": "user1",
   "nickname": "유저일",
-  "userEmail": "user1@moida.com",
+  "userEmail": "user1@sagwim.com",
   "address": "서울 마포구 합정동",
   "role": "USER",
   "createdAt": "2026-04-17T10:00:00",
@@ -41,7 +41,7 @@
 ```json
 {
   "nickname": "새닉네임",
-  "userEmail": "new@moida.com",
+  "userEmail": "new@sagwim.com",
   "address": "서울 용산구 이태원동",
   "currentPassword": "Test1234!",
   "newPassword": "NewPass5678!"
@@ -63,7 +63,7 @@
   "id": "aaaaaaaa-0000-0000-0000-000000000002",
   "username": "user1",
   "nickname": "새닉네임",
-  "userEmail": "new@moida.com",
+  "userEmail": "new@sagwim.com",
   "address": "서울 용산구 이태원동",
   "role": "USER",
   "createdAt": "2026-04-17T10:00:00",
@@ -115,21 +115,21 @@ GET /api/v1/users?page=0&size=10
       "id": "aaaaaaaa-0000-0000-0000-000000000001",
       "username": "admin",
       "nickname": "관리자",
-      "userEmail": "admin@moida.com",
+      "userEmail": "admin@sagwim.com",
       "address": "서울 강남구 삼성동"
     },
     {
       "id": "aaaaaaaa-0000-0000-0000-000000000002",
       "username": "user1",
       "nickname": "유저일",
-      "userEmail": "user1@moida.com",
+      "userEmail": "user1@sagwim.com",
       "address": "서울 마포구 합정동"
     },
     {
       "id": "aaaaaaaa-0000-0000-0000-000000000003",
       "username": "user2",
       "nickname": "유저이",
-      "userEmail": "user2@moida.com",
+      "userEmail": "user2@sagwim.com",
       "address": "서울 송파구 잠실동"
     }
   ],

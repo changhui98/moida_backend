@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: moida
+    name: sagwim
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   servlet:
