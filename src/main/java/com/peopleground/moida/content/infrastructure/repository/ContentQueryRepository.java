@@ -326,12 +326,7 @@ public class ContentQueryRepository {
         if (searchType == SearchType.USERNAME) {
             builder.and(user.username.containsIgnoreCase(keyword));
         } else {
-            // PostgreSQL FTS: to_tsvector / plainto_tsquery 방식으로 본문 검색
-            // GIN 인덱스(idx_content_body_fts)를 활용해 LIKE 대비 성능을 대폭 향상
-            builder.and(Expressions.booleanTemplate(
-                "to_tsvector('simple', {0}) @@ plainto_tsquery('simple', {1})",
-                content.body, keyword
-            ));
+            builder.and(content.body.containsIgnoreCase(keyword));
         }
 
         return builder;
