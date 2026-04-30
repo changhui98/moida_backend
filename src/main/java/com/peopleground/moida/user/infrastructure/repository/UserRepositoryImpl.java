@@ -83,4 +83,10 @@ public class UserRepositoryImpl implements UserRepository {
 
         return userJpaRepository.findByProviderAndProviderId(provider, providerId);
     }
+
+    @Override
+    public Page<User> searchByKeyword(String keyword, Pageable pageable) {
+
+        return userQueryRepository.searchByKeyword(keyword, pageable);
+    }
 }

@@ -2,6 +2,7 @@ package com.peopleground.moida.user.infrastructure.repository;
 
 import com.peopleground.moida.user.domain.entity.QUser;
 import com.peopleground.moida.user.domain.entity.User;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
@@ -60,6 +61,33 @@ public class UserQueryRepository {
         Long total = queryFactory
             .select(user.count())
             .from(user)
+            .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0);
+    }
+
+    public Page<User> searchByKeyword(String keyword, Pageable pageable) {
+
+        QUser user = QUser.user;
+
+        BooleanBuilder condition = new BooleanBuilder();
+        condition.and(user.deletedDate.isNull());
+        if (keyword != null && !keyword.isBlank()) {
+            condition.and(user.nickname.containsIgnoreCase(keyword));
+        }
+
+        List<User> content = queryFactory
+            .selectFrom(user)
+            .where(condition)
+            .orderBy(user.createdDate.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        Long total = queryFactory
+            .select(user.count())
+            .from(user)
+            .where(condition)
             .fetchOne();
 
         return new PageImpl<>(content, pageable, total != null ? total : 0);

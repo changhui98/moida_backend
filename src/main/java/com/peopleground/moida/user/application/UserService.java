@@ -54,6 +54,13 @@ public class UserService {
         return PageResponse.from(result);
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<UserResponseMarker> searchUsers(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserResponse> result = userRepository.searchByKeyword(keyword, pageable).map(UserResponse::from);
+        return PageResponse.from(result);
+    }
+
     @Transactional
     public UserDetailResponse updateProfile(CustomUser customUser, UserUpdateRequest req) {
 

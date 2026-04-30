@@ -32,4 +32,6 @@ public interface UserRepository {
     Map<String, String> findNicknamesByUsernames(Collection<String> usernames);
 
     Optional<User> findByProviderAndProviderId(OAuthProvider provider, String providerId);
+
+    Page<User> searchByKeyword(String keyword, Pageable pageable);
 }
