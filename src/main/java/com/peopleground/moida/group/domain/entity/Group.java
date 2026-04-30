@@ -53,6 +53,9 @@ public class Group extends AuditingEntity {
     @Column(nullable = true)
     private String imageUrl;
 
+    @Column(nullable = true, length = 50)
+    private String region;
+
     @Column(nullable = false)
     private int likeCount = 0;
 
@@ -65,6 +68,7 @@ public class Group extends AuditingEntity {
         String description,
         GroupCategory category,
         GroupMeetingType meetingType,
+        String region,
         int maxMemberCount,
         User leader
     ) {
@@ -73,6 +77,7 @@ public class Group extends AuditingEntity {
         group.description = description;
         group.category = category;
         group.meetingType = meetingType;
+        group.region = meetingType == GroupMeetingType.ONLINE ? null : region;
         group.maxMemberCount = maxMemberCount;
         group.currentMemberCount = 0;
         group.likeCount = 0;
@@ -80,11 +85,12 @@ public class Group extends AuditingEntity {
         return group;
     }
 
-    public void update(String name, String description, GroupCategory category, GroupMeetingType meetingType, int maxMemberCount) {
+    public void update(String name, String description, GroupCategory category, GroupMeetingType meetingType, String region, int maxMemberCount) {
         this.name = name;
         this.description = description;
         this.category = category;
         this.meetingType = meetingType;
+        this.region = meetingType == GroupMeetingType.ONLINE ? null : region;
         this.maxMemberCount = maxMemberCount;
     }
 
